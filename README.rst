@@ -5,16 +5,14 @@ Robair ROS stack
 Get sources
 ===========
 
-
 ::
 
    roscd
    git clone git@github.com:SalemHarrache/robair-ros-pkg.git
 
 
-Run Test Node
-=============
-
+Run on Robot
+============
 
 ::
 
@@ -24,12 +22,4 @@ Run Test Node
 
 ::
 
-    roslaunch robair_test_node usb_cam-test.launch
-
-
-Open a new terminal and execute:
-
-::
-
-    rosrun rqt_graph rqt_graph
-
+    roslaunch robair_app robot.launch jid:=robot@server.com password:=secret
