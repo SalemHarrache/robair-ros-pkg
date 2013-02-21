@@ -1,0 +1,19 @@
+<package>
+  <description brief="robair_app">
+
+     robair_app
+
+  </description>
+  <author>Salem</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/robair_app</url>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+  <depend package="robair_msgs"/>
+  <depend package="robair_driver"/>
+
+
+</package>
+
+

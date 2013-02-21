@@ -1,0 +1,10 @@
+<stack>
+  <description brief="robair">
+    ROS stack with Robair packages [...]
+  </description>
+  <author>Salem Harrache</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://air.imag.fr/mediawiki/index.php/RobAIR2013</url>
+  <depend stack="ros" />
+</stack>

@@ -1,0 +1,14 @@
+<package>
+  <description brief=" Messages and services for Robair">
+
+     Messages and services for Robair
+
+  </description>
+  <author>Salem Harrache</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/robair_msgs</url>
+  <depend package="nav_msgs"/>
+  <depend package="std_msgs"/>
+
+</package>
