@@ -15,6 +15,6 @@
   </node> -->
 
   <!-- Start rviz and load config -->
-  <!-- <node pkg="rqt_graph" type="rqt_graph" output="screen" name="rqt_graph" /> -->
+  <node pkg="rqt_graph" type="rqt_graph" output="screen" name="rqt_graph" />
 
 </launch>
