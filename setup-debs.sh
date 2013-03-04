@@ -84,6 +84,7 @@ displayandexec "Install virtualenv" pip install -U virtualenv
 displayandexec "Install pep8 & pyflakes" pip install -U pep8 pyflakes
 displayandexec "Install sleekxmpp" pip install -U sleekxmpp
 displayandexec "Install dnspython" pip install -U dnspython
+displayandexec "Install nxt-python" pip install -U nxt-python
 
 displaytitle "PySide PPA installation"
 
