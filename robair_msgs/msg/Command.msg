@@ -1,3 +1,2 @@
-uint8 leg                   # which leg to use (left/right, see below)
-uint8 right=1               # right leg constant
-uint8 left=1                # left leg constant
+uint8 speed  # speed [-3, 3]
+uint8 angle  # angle [0, 180]
