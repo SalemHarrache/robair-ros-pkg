@@ -7,7 +7,8 @@
 
   <node pkg="robair_driver" type="battery.py" name="battery" required="true" output="screen" />
   <node pkg="robair_driver" type="network.py" name="network" required="true" output="screen" />
-  <node pkg="robair_app" type="robot_manager.py" name="robot_manager" required="true" output="screen"/>
+  <node pkg="robair_app" type="testEmit.py" name="testEmit" required="true" output="screen" />
+  <!-- <node pkg="robair_app" type="robot_manager.py" name="robot_manager" required="true" output="screen"/> -->
 
   <!-- <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
       <remap from="image" to="/camera/image"/>

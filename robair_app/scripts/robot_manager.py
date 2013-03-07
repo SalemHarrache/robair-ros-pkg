@@ -17,7 +17,6 @@ if __name__ == '__main__':
     xmpp.connect()
     xmpp.process(block=False)
     rospy.loginfo("robair_manager running...")
-    xmpp.send_message('melinda.aissani@gmail.com', 'I love YOU <3')
     rospy.spin()
     rospy.loginfo("robair_manager stopping...")
     xmpp.disconnect()
