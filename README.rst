@@ -11,6 +11,15 @@ Get sources
    git clone git@github.com:SalemHarrache/robair-ros-pkg.git
 
 
+Install dependencies
+====================
+
+::
+
+    sudo ./setup-debs.sh
+
+
+
 Run on Robot
 ============
 
