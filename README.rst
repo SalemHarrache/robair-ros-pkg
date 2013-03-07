@@ -32,3 +32,8 @@ Run on Robot
 ::
 
     roslaunch robair_app robot.launch jid:=robot@server.com password:=secret
+
+
+::
+
+    rostopic echo /info/battery
