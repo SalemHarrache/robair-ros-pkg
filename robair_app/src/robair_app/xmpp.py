@@ -3,13 +3,12 @@ import rospy
 from sleekxmpp import ClientXMPP
 
 
-class RobBot(ClientXMPP):
-
-    def __init__(self, jid, password):
-        super(RobBot, self).__init__(jid, password)
-        rospy.init_node('robbot')
+class BotXMPP(ClientXMPP):
+    def __init__(self, jid, password, node_name):
+        super(BotXMPP, self).__init__(jid, password)
+        rospy.init_node(node_name)
         self.add_event_handler("session_start", self.session_start)
-        self.add_event_handler("message", self.echo_answer)
+        self.add_event_handler("message", self.message_handler)
         self.load_plugin()
         logging.basicConfig()
 
@@ -17,12 +16,12 @@ class RobBot(ClientXMPP):
         self.send_presence()
         self.get_roster()
 
-    def echo_answer(self, msg):
-        if msg['type'] in ('chat', 'normal'):
-            msg.reply(msg['body']).send()
+    def message_handler(self, msg):
+        print(msg['body'])
+        pass
 
     def send_message(self, dest, mbody):
-        super(RobBot, self).send_message(mto=dest, mbody=mbody, mtype='chat')
+        super(BotXMPP, self).send_message(mto=dest, mbody=mbody, mtype='chat')
 
     def load_plugin(self):
         self.register_plugin('xep_0030')  # Service Discovery
@@ -30,3 +29,18 @@ class RobBot(ClientXMPP):
         self.register_plugin('xep_0060')  # PubSub
         self.register_plugin('xep_0199')  # XMPP Ping
         self.auto_reconnect = True
+
+
+class RobBot(BotXMPP):
+    def __init__(self, jid, password, node_name):
+        super(RobBot, self).__init__(jid, password, node_name)
+
+    def message_handler(self, msg):
+        # echo serveur
+        if msg['type'] in ('chat', 'normal'):
+            msg.reply(msg['body']).send()
+
+
+class ClientBot(BotXMPP):
+    def __init__(self, jid, password, node_name):
+        super(ClientBot, self).__init__(jid, password, node_name)
