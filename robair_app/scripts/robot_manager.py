@@ -11,12 +11,9 @@ from robair_app.xmpp import RobBot
 
 
 if __name__ == '__main__':
-    jid = rospy.get_param('robot_jabber_id')
-    password = rospy.get_param('robot_jabber_password')
-
     node_name = os.path.basename(__file__).strip('.py')
 
-    xmpp = RobBot(jid, password, node_name)
+    xmpp = RobBot(node_name)
 
     xmpp.connect()
     xmpp.process(block=False)

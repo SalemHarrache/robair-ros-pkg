@@ -1,6 +1,8 @@
 import logging
 import rospy
 from sleekxmpp import ClientXMPP
+from robair_msgs.msg import Command
+import cPickle
 
 
 class BotXMPP(ClientXMPP):
@@ -18,7 +20,8 @@ class BotXMPP(ClientXMPP):
 
     def message_handler(self, msg):
         print(msg['body'])
-        pass
+        topic_data = cPickle.loads(msg)
+        self.pub = rospy.Publisher(topic_data.topic, topic_data.data)
 
     def send_message(self, dest, mbody):
         super(BotXMPP, self).send_message(mto=dest, mbody=mbody, mtype='chat')
@@ -32,7 +35,9 @@ class BotXMPP(ClientXMPP):
 
 
 class RobBot(BotXMPP):
-    def __init__(self, jid, password, node_name):
+    def __init__(self, node_name):
+        jid = rospy.get_param('robot_jabber_id')
+        password = rospy.get_param('robot_jabber_password')
         super(RobBot, self).__init__(jid, password, node_name)
 
     def message_handler(self, msg):
@@ -42,5 +47,19 @@ class RobBot(BotXMPP):
 
 
 class ClientBot(BotXMPP):
-    def __init__(self, jid, password, node_name):
+    def __init__(self, node_name):
+        jid = rospy.get_param('tv_jabber_id')
+        password = rospy.get_param('tv_jabber_password')
+        self.robot_jid = rospy.get_param('robot_jabber_id')
         super(ClientBot, self).__init__(jid, password, node_name)
+
+        self.topic_name = "/cmd"
+        rospy.Subscriber(self.topic_name, Command, self.callback)
+        rospy.spin()
+
+    def callback(self, data):
+        rospy.loginfo("%s: I heard  speed %s - curve %s :D"
+                      % (rospy.get_name(), data.speed, data.angle))
+        topic_to_serialize = {"topic": self.topic_name, "data": data}
+        msg = cPickle.dumps(topic_to_serialize)
+        self.send_message(self.robot_jid, msg)
