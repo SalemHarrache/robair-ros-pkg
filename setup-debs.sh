@@ -87,7 +87,7 @@ displayandexec "Install dnspython" pip install -U dnspython
 displayandexec "Install nxt-python" pip install -U nxt-python
 
 displaytitle "PySide PPA installation"
-echo "deb http://ppa.launchpad.net/pyside/ubuntu precise main" >> /etc/apt/sources.list
+echo "deb http://ppa.launchpad.net/pyside/ppa/ubuntu precise main" >> /etc/apt/sources.list
 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 073700C1  #pyside
 displayandexec "Update the repositories list" apt-get update
 displayandexec "Install PySide from PPA" apt-get -y install python-pyside
