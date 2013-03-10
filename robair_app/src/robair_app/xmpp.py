@@ -5,6 +5,7 @@ import cPickle
 import thread
 import inspect
 from robair_msgs.msg import Command
+from robair_common.logger import LOGGER
 
 
 def botcmd(*args, **kwargs):
@@ -40,8 +41,8 @@ class BotXMPP(ClientXMPP):
         for name, value in inspect.getmembers(self, inspect.ismethod):
             if getattr(value, '_jabberbot_command', False):
                 name = getattr(value, '_jabberbot_command_name')
-                self.log.info('Registered command: %s' % name)
-                self.commands[self.__command_prefix + name] = value
+                LOGGER.info('Registered command: %s' % name)
+                self.commands[name] = value
 
         logging.basicConfig()
         # import pdb; pdb.set_trace()
@@ -109,6 +110,10 @@ class RobBot(BotXMPP):
         jid = rospy.get_param('robot_jabber_id')
         password = rospy.get_param('robot_jabber_password')
         super(RobBot, self).__init__(jid, password, node_name)
+
+    @botcmd
+    def echo(self, *args, **kwargs):
+        return args[0]
 
 
 class ClientBot(BotXMPP):
