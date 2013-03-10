@@ -6,7 +6,7 @@ import rospy
 
 roslib.load_manifest('robair_app')
 
-from robair_app.xmpp import RobBot
+from robair_app.manager import RobBot
 
 
 if __name__ == '__main__':

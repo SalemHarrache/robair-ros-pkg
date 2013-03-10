@@ -1,18 +1,16 @@
-import logging
 import rospy
 from sleekxmpp import ClientXMPP
-import cPickle
+# import cPickle
 import inspect
 import traceback
-from robair_msgs.msg import Command
 from robair_common.logger import LOGGER
-from robair_common.utils import ThreadPool
+from robair_common.utils import ThreadPool, parse_args
 
 
 def botcmd(*args, **kwargs):
     """Decorator for bot command functions"""
 
-    def decorate(func, name=None, threaded=True):
+    def decorate(func, name=None, threaded=False):
         setattr(func, '_command', True)
         setattr(func, '_command_name', name or func.__name__)
         setattr(func, '_threaded', threaded)  # Experimental!
@@ -32,10 +30,9 @@ class BotXMPP(ClientXMPP):
     def __init__(self, jid, password, node_name, num_thread=2):
         super(BotXMPP, self).__init__(jid, password)
         rospy.init_node(node_name)
-        self.log = logging.getLogger(__name__)
         self.add_event_handler("session_start", self._session_start)
         self.add_event_handler("message", self._message_handler)
-        self.load_plugin()
+        self._load_plugin()
 
         self.commands = {}
         for name, value in inspect.getmembers(self, inspect.ismethod):
@@ -71,9 +68,12 @@ class BotXMPP(ClientXMPP):
         if (msg['type'] not in ('chat', 'normal')
                 or msg['body'] == ''):
             return
+        LOGGER.info("%s: %s" % (self.__class__.__name__, msg['body']))
         msg_parts = msg['body'].split(' ')
-        cmd, args = msg_parts[0], msg_parts[-1:] if len(msg_parts) > 1 else []
-        kwargs = {}
+        print msg_parts
+        cmd, args = msg_parts[0], msg_parts[1:] if len(msg_parts) > 1 else []
+        LOGGER.debug("cmd : %s :: args : %s" % (cmd, args))
+        args, kwargs = parse_args(args)
         LOGGER.debug("cmd : %s :: args : %s :: kwargs : %s" %
                      (cmd, args, kwargs))
 
@@ -96,33 +96,3 @@ class BotXMPP(ClientXMPP):
     def wait_completion(self):
         self.thread_pool.wait_completion()
         self.disconnect()
-
-
-class RobBot(BotXMPP):
-    def __init__(self, node_name):
-        jid = rospy.get_param('robot_jabber_id')
-        password = rospy.get_param('robot_jabber_password')
-        super(RobBot, self).__init__(jid, password, node_name)
-
-    @botcmd
-    def echo(self, *args, **kwargs):
-        return args[0]
-
-
-class ClientBot(BotXMPP):
-    def __init__(self, node_name):
-        jid = rospy.get_param('tv_jabber_id')
-        password = rospy.get_param('tv_jabber_password')
-        self.robot_jid = rospy.get_param('robot_jabber_id')
-        super(ClientBot, self).__init__(jid, password, node_name)
-
-        self.topic_name = "/cmd"
-        rospy.Subscriber(self.topic_name, Command, self.callback)
-        rospy.spin()
-
-    def callback(self, data):
-        rospy.loginfo("%s: I heard  speed %s - curve %s :D"
-                      % (rospy.get_name(), data.speed, data.angle))
-        topic_to_serialize = {"topic": self.topic_name, "data": data}
-        msg = cPickle.dumps(topic_to_serialize)
-        self.send_message(self.robot_jid, msg)
