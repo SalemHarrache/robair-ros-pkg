@@ -1,27 +1,97 @@
 import logging
 import rospy
 from sleekxmpp import ClientXMPP
-from robair_msgs.msg import Command
 import cPickle
+import thread
+import inspect
+from robair_msgs.msg import Command
+
+
+def botcmd(*args, **kwargs):
+    """Decorator for bot command functions"""
+
+    def decorate(func, name=None, thread=False):
+        setattr(func, '_jabberbot_command', True)
+        setattr(func, '_jabberbot_command_name', name or func.__name__)
+        setattr(func, '_jabberbot_command_thread', thread)  # Experimental!
+        return func
+
+    if len(args):
+        return decorate(args[0], **kwargs)
+    else:
+        return lambda func: decorate(func, **kwargs)
 
 
 class BotXMPP(ClientXMPP):
+    MSG_ERROR_OCCURRED = 'Sorry for your inconvenience. '\
+                         'An unexpected error occurred.'
+    MSG_UNKNOWN_COMMAND = 'Unknown command: %s". \n'\
+                          'Type help for available commands.'
+
     def __init__(self, jid, password, node_name):
         super(BotXMPP, self).__init__(jid, password)
         rospy.init_node(node_name)
+        self.log = logging.getLogger(__name__)
         self.add_event_handler("session_start", self.session_start)
         self.add_event_handler("message", self.message_handler)
         self.load_plugin()
+
+        self.commands = {}
+        for name, value in inspect.getmembers(self, inspect.ismethod):
+            if getattr(value, '_jabberbot_command', False):
+                name = getattr(value, '_jabberbot_command_name')
+                self.log.info('Registered command: %s' % name)
+                self.commands[self.__command_prefix + name] = value
+
         logging.basicConfig()
+        # import pdb; pdb.set_trace()
 
     def session_start(self, event):
         self.send_presence()
         self.get_roster()
 
     def message_handler(self, msg):
-        print(msg['body'])
-        topic_data = cPickle.loads(msg)
-        self.pub = rospy.Publisher(topic_data.topic, topic_data.data)
+        LOGGER.debug("msg['type'] = %s" % msg['type'])
+        if (msg['type'] not in ('chat', 'normal')
+                or msg['body'] == ''):
+            return
+        msg_parts = msg['body'].split(' ')
+        cmd, args = msg_parts[0], msg_parts[-1:] if len(msg_parts) > 1 else []
+        LOGGER.debug("cmd : %s :: args : %s" % (cmd, args))
+        if cmd in self.commands:
+            def execute_and_send():
+                try:
+                    msg.reply(self.commands[cmd](*args)).send()
+                except Exception:
+                    msg.reply(self.MSG_ERROR_OCCURRED).send()
+
+            # Experimental!
+            # if command should be executed in a seperate thread do it
+            if self.commands[cmd]._jabberbot_command_thread:
+                thread.start_new_thread(execute_and_send, ())
+            else:
+                execute_and_send()
+        else:
+            pass
+            # # In private chat, it's okay for the bot to always respond.
+            # # In group chat, the bot should silently ignore commands it
+            # # doesn't understand or aren't handled by unknown_command().
+            # if type == 'groupchat':
+            #     default_reply = None
+            # else:
+            #     default_reply = self.MSG_UNKNOWN_COMMAND % {
+            #         'command': cmd,
+            #         'helpcommand': 'help',
+            #     }
+            # reply = self.unknown_command(mess, cmd, args)
+            # if reply is None:
+            #     reply = default_reply
+            # if reply:
+            #     self.send_simple_reply(mess, reply)
+
+        # print(msg['body'])
+        # topic_data = cPickle.loads(msg)
+        # self.pub = rospy.Publisher(topic_data.topic, topic_data.data)
 
     def send_message(self, dest, mbody):
         super(BotXMPP, self).send_message(mto=dest, mbody=mbody, mtype='chat')
@@ -39,11 +109,6 @@ class RobBot(BotXMPP):
         jid = rospy.get_param('robot_jabber_id')
         password = rospy.get_param('robot_jabber_password')
         super(RobBot, self).__init__(jid, password, node_name)
-
-    def message_handler(self, msg):
-        # echo serveur
-        if msg['type'] in ('chat', 'normal'):
-            msg.reply(msg['body']).send()
 
 
 class ClientBot(BotXMPP):
