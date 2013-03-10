@@ -82,7 +82,8 @@ displayandexec "Install development tools" apt-get -y install python2.7-dev pyth
 displayandexec "Update distribute" pip install -U distribute
 displayandexec "Install virtualenv" pip install -U virtualenv
 displayandexec "Install pep8 & pyflakes" pip install -U pep8 pyflakes
-displayandexec "Install xmpppy & jabberbot" pip install -U xmpppy jabberbot
+displayandexec "Install sleekxmpp" pip install -U sleekxmpp
+displayandexec "Install dnspython" pip install -U dnspython
 displayandexec "Install nxt-python" pip install -U nxt-python
 
 displaytitle "PySide PPA installation"

@@ -16,8 +16,14 @@ if __name__ == '__main__':
 
     node_name = os.path.basename(__file__).strip('.py')
 
-    xmpp_bot = ClientBot(node_name, jid, password)
-    xmpp_bot.serve_forever()
+    xmpp = ClientBot(jid, password, node_name)
+
+    xmpp.connect()
+    xmpp.process(block=False)
     rospy.loginfo("%s running..." % node_name)
+    xmpp.send_message('robair@quicker.fr', 'Hello Robair!')
     rospy.spin()
+    rospy.loginfo("%s stopping..." % node_name)
+    xmpp.disconnect()
+
     rospy.loginfo("%s stopped." % node_name)

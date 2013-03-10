@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="jid" default="robair@im.quicker.fr "/>
+  <arg name="jid" default="robair@quicker.fr "/>
   <arg name="password" default="robair" />
   <param name="robot_jabber_id" value="$(arg jid)"/>
 
@@ -11,6 +11,6 @@
   <node pkg="robair_app" type="robot_manager.py" name="robot_manager" required="true" output="screen"/>
 
   <!-- Start rviz and load config -->
-  <!-- <node pkg="rqt_graph" type="rqt_graph" output="screen" name="rqt_graph" /> -->
+  <node pkg="rqt_graph" type="rqt_graph" output="screen" name="rqt_graph" />
 
 </launch>
