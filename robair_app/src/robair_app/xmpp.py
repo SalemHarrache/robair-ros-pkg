@@ -70,9 +70,7 @@ class BotXMPP(ClientXMPP):
                 or msg['body'] == ''):
             return
         msg_parts = msg['body'].split(' ')
-        print msg_parts
         cmd, args = msg_parts[0], msg_parts[1:] if len(msg_parts) > 1 else []
-        LOGGER.debug("cmd : %s :: args : %s" % (cmd, args))
         args, kwargs = parse_args(args)
         LOGGER.debug("cmd : %s :: args : %s :: kwargs : %s" %
                      (cmd, args, kwargs))
