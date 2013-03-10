@@ -65,10 +65,10 @@ class BotXMPP(ClientXMPP):
             task(func, args, kwargs)
 
     def _message_handler(self, msg):
+        LOGGER.info("%s read: %s" % (self.__class__.__name__, msg['body']))
         if (msg['type'] not in ('chat', 'normal')
                 or msg['body'] == ''):
             return
-        LOGGER.info("%s: %s" % (self.__class__.__name__, msg['body']))
         msg_parts = msg['body'].split(' ')
         print msg_parts
         cmd, args = msg_parts[0], msg_parts[1:] if len(msg_parts) > 1 else []
