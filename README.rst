@@ -31,8 +31,10 @@ Run on Robot
 
 ::
 
-    roslaunch robair_app robot.launch jid:=robot@server.com password:=secret
+    roslaunch robair_app robot.launch
 
+
+Displays information about ROS topics with rostopic command-line  
 
 ::
 
