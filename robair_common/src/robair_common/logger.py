@@ -17,7 +17,7 @@ roslib.load_manifest('robair_common')
 def get_logger():
     '''Initialize a speaking logger with stream handler (stderr).'''
     logger = logging.getLogger("robair")
-    level_name = rospy.get_param('logger_level')
+    level_name = rospy.get_param('logger_level', 'DEBUG')
     if level_name not in ["CRITICAL", "ERROR", "WARN", "INFO", "DEBUG"]:
         logger.addHandler(NullHandler())
         return logger
