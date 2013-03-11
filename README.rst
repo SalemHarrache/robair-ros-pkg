@@ -31,7 +31,7 @@ Run on Robot
 
 ::
 
-    roslaunch robair_app robot.launch
+    make robot
 
 
 Displays information about ROS topics with rostopic command-line  
