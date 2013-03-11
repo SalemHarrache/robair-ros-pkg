@@ -1,0 +1,27 @@
+SHELL := /bin/bash
+
+# these files should pass pyflakes
+PYFLAKES_WHITELIST=$(shell find . -name "*.py" ! -path "./doc/*" \
+                    ! -path "./.tox/*" ! -path "*/compat.py" \
+                    ! -path */build/* ! -path */_*.py)
+
+test:
+	tox
+
+pyflakes:
+	pyflakes ${PYFLAKES_WHITELIST}
+
+pep:
+	pep8 --first --exclude="_*,*build,*.tox" .
+
+gitclean:
+	git clean -Xfd
+
+doc:
+	rosrun rosdoc rosdoc $(ls -a | grep robair)
+
+robot:
+	roslaunch robair_app robot.launch
+
+tv:
+	roslaunch robair_app tv.launch
