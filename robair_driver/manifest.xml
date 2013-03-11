@@ -10,7 +10,7 @@
   <url>http://ros.org/wiki/robair_driver</url>
   <depend package="std_msgs"/>
   <depend package="rospy"/>
-
+  <depend package="robair_msgs"/>
 </package>
 
 
