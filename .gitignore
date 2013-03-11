@@ -28,5 +28,11 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+<<<<<<< Updated upstream
 # Document
 doc
+=======
+
+# Other
+*.py_
+>>>>>>> Stashed changes
