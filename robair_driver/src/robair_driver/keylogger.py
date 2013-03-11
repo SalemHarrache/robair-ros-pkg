@@ -29,7 +29,6 @@ from time import sleep, time
 import ctypes as ct
 from ctypes.util import find_library
 
-
 # linux only!
 assert("linux" in sys.platform)
 
@@ -136,8 +135,14 @@ key_mapping = {
         0b00000100: "<caps lock>",
     },
     13: {
+        0b10000000: "top",
         #0b00000010: "<right ctrl>",
         #0b00010000: "<right alt>",
+    },
+    14: {
+        0b00000100: "right",
+        0b00000010: "left",
+        0b00010000: "bottom",
     },
 }
 
