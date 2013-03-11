@@ -28,5 +28,7 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
-# Document
+
+# Other
+*.py_
 doc
