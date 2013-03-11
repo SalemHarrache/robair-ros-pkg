@@ -4,7 +4,7 @@ from sleekxmpp import ClientXMPP
 import inspect
 import traceback
 from robair_common.logger import LOGGER
-from robair_common.utils import ThreadPool, parse_args
+from robair_common.utils import parse_args
 
 
 def botcmd(*args, **kwargs):
@@ -40,7 +40,6 @@ class BotXMPP(ClientXMPP):
                 name = getattr(value, '_command_name')
                 LOGGER.info('Registered command: %s' % name)
                 self.commands[name] = value
-        self.threads_pool = ThreadPool(num_thread)
 
     def _session_start(self, event):
         self.send_presence()
@@ -90,7 +89,3 @@ class BotXMPP(ClientXMPP):
         self.register_plugin('xep_0060')  # PubSub
         self.register_plugin('xep_0199')  # XMPP Ping
         self.auto_reconnect = True
-
-    def wait_completion(self):
-        self.thread_pool.wait_completion()
-        self.disconnect()
