@@ -6,7 +6,7 @@ SHELL := /bin/bash
 # exclude ./env/, which may contain virtualenv packages
 PYFLAKES_WHITELIST=$(shell find . -name "*.py" ! -path "./doc/*" \
                     ! -path "./.tox/*" ! -path "./env/*" \
-                    ! -path "*/compat.py" )
+                    ! -path "*/compat.py" ! */build/* )
 
 test:
 	tox
@@ -15,7 +15,7 @@ pyflakes:
 	pyflakes ${PYFLAKES_WHITELIST}
 
 pep:
-	pep8 --first .
+	pep8 --first --exclude="_*,*build,*.tox" .
 
 gitclean:
 	git clean -Xfd
