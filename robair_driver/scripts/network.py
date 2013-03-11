@@ -8,7 +8,7 @@ import rospy
 from std_msgs.msg import String
 
 
-class NetworkNode():
+class NetworkNode(object):
     '''Robair network node'''
     def __init__(self, interfaces, topic, pubrate=10, node_name='network'):
         self.node_name = node_name
