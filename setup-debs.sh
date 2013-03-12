@@ -86,8 +86,12 @@ displayandexec "Install sleekxmpp" pip install -U sleekxmpp
 displayandexec "Install dnspython" pip install -U dnspython
 displayandexec "Install nxt-python" pip install -U nxt-python
 
+displaytitlec "Redis"
+displayandexec "Install redis-server" sudo apt-get install redis-server
+displayandexec "Install redis-client" pip install -U redis
+
 displaytitle "GStreamer installation"
-displayandexec "Install GIT" apt-get -y install gstreamer-tools
+displayandexec "Install gstreamer-tools" apt-get -y install gstreamer-tools
 
 displaytitle "PySide PPA installation"
 
