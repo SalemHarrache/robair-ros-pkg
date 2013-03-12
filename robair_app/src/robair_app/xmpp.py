@@ -7,13 +7,11 @@ from robair_common.logger import LOGGER
 from robair_common.utils import parse_args
 
 
-def botcmd(*args, **kwargs):
+def remote(*args, **kwargs):
     """Decorator for bot command functions"""
 
     def decorate(func, name=None, threaded=False):
-        setattr(func, '_command', True)
-        setattr(func, '_command_name', name or func.__name__)
-        setattr(func, '_threaded', threaded)  # Experimental!
+        setattr(func, '_xmpp_remote', True)
         return func
 
     if len(args):
@@ -27,19 +25,19 @@ class BotXMPP(ClientXMPP):
                          'An unexpected error occurred.'
     MSG_UNKNOWN_COMMAND = 'Unknown command: %s". \n'
 
-    def __init__(self, jid, password, node_name, num_thread=2):
+    def __init__(self, jid, password, node_name):
         super(BotXMPP, self).__init__(jid, password)
         rospy.init_node(node_name)
         self.add_event_handler("session_start", self._session_start)
         self.add_event_handler("message", self._message_handler)
         self._load_plugin()
 
-        self.commands = {}
+        self.remote_cmds = {}
         for name, value in inspect.getmembers(self, inspect.ismethod):
-            if getattr(value, '_command', False):
-                name = getattr(value, '_command_name')
-                LOGGER.info('Registered command: %s' % name)
-                self.commands[name] = value
+            if getattr(value, '_xmpp_remote', False):
+                name = getattr(value, '__name__')
+                LOGGER.info('Registered remote method: %s' % name)
+                self.remote_cmds[name] = value
 
     def _session_start(self, event):
         self.send_presence()
@@ -58,10 +56,7 @@ class BotXMPP(ClientXMPP):
                                  (msg['body'], msg['from'], exception))
                 msg.reply("%s\n" % (self.MSG_ERROR_OCCURRED)).send()
 
-        if func._threaded:
-            self.threads_pool.add_task(task, args, kwargs)
-        else:
-            task(func, args, kwargs)
+        task(func, args, kwargs)
 
     def _message_handler(self, msg):
         LOGGER.info("%s read: %s" % (self.__class__.__name__, msg['body']))
@@ -74,11 +69,9 @@ class BotXMPP(ClientXMPP):
         LOGGER.debug("cmd : %s :: args : %s :: kwargs : %s" %
                      (cmd, args, kwargs))
 
-        if cmd in self.commands:
-            func = self.commands[cmd]
+        if cmd in self.remote_cmds:
+            func = self.remote_cmds[cmd]
             self._execute_and_send(func, msg, args, kwargs)
-        else:
-            msg.reply(self.MSG_UNKNOWN_COMMAND % cmd).send()
 
     def send_message(self, dest, mbody):
         super(BotXMPP, self).send_message(mto=dest, mbody=mbody, mtype='chat')
@@ -89,3 +82,20 @@ class BotXMPP(ClientXMPP):
         self.register_plugin('xep_0060')  # PubSub
         self.register_plugin('xep_0199')  # XMPP Ping
         self.auto_reconnect = True
+
+
+class XMPPProxy(object):
+    def __init__(self, local_client, remote_jid):
+        self.local_client = local_client
+        self.remote_jid = remote_jid
+
+    def ping(self):
+        result = self['xep_0199'].send_ping(self.remote_jid,
+                                            timeout=10,
+                                            errorfalse=True)
+        LOGGER.debug("%s" % result)
+        if not result:
+            LOGGER.info("Couldn't ping %s" % self.remote_jid)
+            return result
+        else:
+            return True

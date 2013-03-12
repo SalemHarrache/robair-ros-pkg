@@ -1,5 +1,5 @@
 import rospy
-from .xmpp import BotXMPP, botcmd
+from .xmpp import BotXMPP, remote
 # from robair_msgs.msg import Command
 
 
@@ -9,11 +9,11 @@ class RobBot(BotXMPP):
         password = rospy.get_param('robot_jabber_password')
         super(RobBot, self).__init__(jid, password, node_name)
 
-    @botcmd
+    @remote
     def echo(self, message):
         return message
 
-    @botcmd
+    @remote
     def add(self, *args):
         return sum([int(i) for i in args])
 
