@@ -1,13 +1,13 @@
-import os
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from PySide.QtGui import QApplication
 from PySide.phonon import Phonon
 
 app = QApplication([])
 app.setApplicationName('Phonon Video Player')
 
-#file_path = os.path.join(os.path.dirname(__file__), '320x240.ogv')
-
-file_path = 'http://midori.quicker.fr/InNuYWtlLWJpZ2Jvc3Mi.POHN0XlDCMH13fpejhHHYNaaiBQ/files/Animes/onepiece/last/One_Piece_585_SD_Impel-Down.mp4'
+file_path = 'http://127.0.0.1:9090/webcam.ogg'
 media_src = Phonon.MediaSource(file_path)
 
 media_obj = Phonon.MediaObject()
