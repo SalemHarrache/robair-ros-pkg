@@ -21,7 +21,10 @@ class KeyboardNode(object):
         keylogger.log(done, self.key_pressed)
 
     def key_pressed(self, dtime, modifiers, key):
-        print("%.2f %r %r" % (dtime, key, modifiers))
+        directions = {"top": (1, 0), "bottom": (-1, 0),
+                      "left": (None, 1), "right": (1, 90)}
+        if key in directions.keys():
+            self.pub.publish(Command(*directions[key]))
 
 
 if __name__ == '__main__':
