@@ -12,41 +12,27 @@ app = Flask(__name__)
 app.secret_key = 'blablabla'
 
 
-def video_stream():
-    pubsub = red.pubsub()
-    pubsub.subscribe('video')
-    for message in pubsub.listen():
-        print "new_data"
-        yield message['data']
-
-
-@app.route('/webcam.ogg', methods=["GET"])
+@app.route('/webcam.webm', methods=["GET"])
 def video():
-    return Response(video_stream(), mimetype='video/ogg')
+    return Response(video_stream(), mimetype='video/webm')
 
 
-# @app.before_first_request
-def start_grab_video_task():
-    def grab_video_task():
-        command = ('gst-launch videotestsrc ! video/x-raw-rgb,framerate=5/1 '
-                   '! ffmpegcolorspace ! vp8enc ! queue2 ! mux. audiotestsrc '
-                   '! audioconvert ! audioresample ! vorbisenc ! queue2 '
-                   '! mux. webmmux name=mux streamable=true '
-                   '! filesink location=/dev/stdout')
-        print("running command: %s" % command)
-        p = subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=-1,
-                             shell=True)
-        print("starting polling loop.")
-        while(p.poll() is None):
-            print "looping... "
-            red.publish('video', p.stdout.read(1024))
-        print "end looping..."
-    worker = multiprocessing.Process(target=grab_video_task)
-    worker.start()
+def video_stream():
+    command = ('gst-launch videotestsrc ! tee name=videoout ! video/x-raw-rgb,framerate=5/1 '
+               '! ffmpegcolorspace ! vp8enc ! queue2 ! mux. audiotestsrc '
+               '! audioconvert ! audioresample ! vorbisenc ! queue2 '
+               '! mux. webmmux name=mux streamable=true '
+               '! filesink location=/dev/stdout videoout.')
+    print("running command: %s" % command)
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=-1,
+                         shell=True)
+    print("starting polling loop.")
+    while p.poll() is None:
+        print "looping... "
+        yield p.stdout.read(10000)
 
 
 def run():
-    start_grab_video_task()
     app.debug = True
     app.run(port=9090)
 
