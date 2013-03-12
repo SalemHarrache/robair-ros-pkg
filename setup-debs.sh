@@ -86,6 +86,9 @@ displayandexec "Install sleekxmpp" pip install -U sleekxmpp
 displayandexec "Install dnspython" pip install -U dnspython
 displayandexec "Install nxt-python" pip install -U nxt-python
 
+displaytitle "GStreamer installation"
+displayandexec "Install GIT" apt-get -y install gstreamer-tools
+
 displaytitle "PySide PPA installation"
 
 if [ "$(dpkg-query -W -f='${Status}' python-pyside)" == "install ok installed" ]
@@ -93,7 +96,7 @@ then
 displayandexec "Already instaled" echo > /dev/null
 else
 echo "deb http://ppa.launchpad.net/pyside/ppa/ubuntu precise main" >> /etc/apt/sources.list.d/pyside.list
-displayandexec "Add PPA repository" apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 073700C1 
+displayandexec "Add PPA repository" apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 073700C1
 displayandexec "Update the repositories list" apt-get update
 displayandexec "Install PySide from PPA" apt-get -y install python-pyside
 fi
