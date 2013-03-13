@@ -4,11 +4,17 @@ from sleekxmpp import ClientXMPP
 import inspect
 import traceback
 from robair_common.logger import LOGGER
-from robair_common.utils import parse_args
+from robair_common.utils import parse_args, retry
+
+
+class RemoteXMPPException(Exception):
+    '''Exception that happens when the remote method call failled'''
+    def __str__(self):
+        return self.__doc__
 
 
 def remote(*args, **kwargs):
-    """Decorator for bot command functions"""
+    """Decorator for remote xmpp functions"""
 
     def decorate(func, name=None, threaded=False):
         setattr(func, '_xmpp_remote', True)
@@ -20,6 +26,31 @@ def remote(*args, **kwargs):
         return lambda func: decorate(func, **kwargs)
 
 
+class RemoteXMPPProxy(object):
+    """ RemoteXMPPProxy """
+    def __init__(self, client, remote_jid):
+        self.client = client
+        self.remote_jid = remote_jid
+
+        result = self.client['xep_0199'].send_ping(self.remote_jid,
+                                                   timeout=10,
+                                                   errorfalse=True)
+        LOGGER.debug("%s" % result)
+        if not result:
+            LOGGER.info("Couldn't ping %s" % self.remote_jid)
+            return result
+        else:
+            return True
+        if not ping():
+            message = "remote %s XMPP agent is unavailable" % self.remote_jid
+            raise RemoteXMPPException(message)
+
+    def __getattribute__(self, name):
+        import pdb; pdb.set_trace()
+        1 / 0
+        return getattr(object.__getattribute__(self, "_obj"), name)
+
+
 class BotXMPP(ClientXMPP):
     MSG_ERROR_OCCURRED = 'Sorry for your inconvenience. '\
                          'An unexpected error occurred.'
@@ -28,9 +59,9 @@ class BotXMPP(ClientXMPP):
     def __init__(self, jid, password, node_name):
         super(BotXMPP, self).__init__(jid, password)
         rospy.init_node(node_name)
-        self.add_event_handler("session_start", self._session_start)
-        self.add_event_handler("message", self._message_handler)
-        self._load_plugin()
+        self.add_event_handler("session_start", self.session_start)
+        self.add_event_handler("message", self.message_handler)
+        self.load_plugin()
 
         self.remote_cmds = {}
         for name, value in inspect.getmembers(self, inspect.ismethod):
@@ -39,11 +70,17 @@ class BotXMPP(ClientXMPP):
                 LOGGER.info('Registered remote method: %s' % name)
                 self.remote_cmds[name] = value
 
-    def _session_start(self, event):
+        self.connect()
+        self.process(block=False)
+
+    def get_proxy(self, jid):
+        return RemoteXMPPProxy(self, jid)
+
+    def session_start(self, event):
         self.send_presence()
         self.get_roster()
 
-    def _execute_and_send(self, func, msg, args, kwargs):
+    def execute_and_send(self, func, msg, args, kwargs):
         """ Execute command and reply with the result. """
         def task(func, args, kwargs):
             try:
@@ -58,7 +95,7 @@ class BotXMPP(ClientXMPP):
 
         task(func, args, kwargs)
 
-    def _message_handler(self, msg):
+    def message_handler(self, msg):
         LOGGER.info("%s read: %s" % (self.__class__.__name__, msg['body']))
         if (msg['type'] not in ('chat', 'normal')
                 or msg['body'] == ''):
@@ -71,31 +108,14 @@ class BotXMPP(ClientXMPP):
 
         if cmd in self.remote_cmds:
             func = self.remote_cmds[cmd]
-            self._execute_and_send(func, msg, args, kwargs)
+            self.execute_and_send(func, msg, args, kwargs)
 
     def send_message(self, dest, mbody):
         super(BotXMPP, self).send_message(mto=dest, mbody=mbody, mtype='chat')
 
-    def _load_plugin(self):
+    def load_plugin(self):
         self.register_plugin('xep_0030')  # Service Discovery
         self.register_plugin('xep_0004')  # Data Forms
         self.register_plugin('xep_0060')  # PubSub
         self.register_plugin('xep_0199')  # XMPP Ping
         self.auto_reconnect = True
-
-
-class XMPPProxy(object):
-    def __init__(self, local_client, remote_jid):
-        self.local_client = local_client
-        self.remote_jid = remote_jid
-
-    def ping(self):
-        result = self['xep_0199'].send_ping(self.remote_jid,
-                                            timeout=10,
-                                            errorfalse=True)
-        LOGGER.debug("%s" % result)
-        if not result:
-            LOGGER.info("Couldn't ping %s" % self.remote_jid)
-            return result
-        else:
-            return True
