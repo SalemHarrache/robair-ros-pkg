@@ -22,9 +22,9 @@ def run_gstreamer():
     def gstreamer_task():
 
         command = ('gst-launch v4l2src  ! decodebin ! queue ! ffmpegcolorspace'
-                   '! x264enc byte-stream=true bitrate=200 bframes=4 ref=1'
+                   '! x264enc byte-stream=true bitrate=200 bframes=4 ref=1 '
                    'me=dia subme=1 weightb=true threads=0 ! avimux ! '
-                   'tcpserversink port=9999')
+                   'tcpserversink port=9999 ')
         subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=-1,
                          shell=True)
     gstreamer_worker = multiprocessing.Process(target=gstreamer_task)
