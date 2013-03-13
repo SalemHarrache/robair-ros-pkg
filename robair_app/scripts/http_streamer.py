@@ -22,7 +22,7 @@ def run_gstreamer():
     def gstreamer_task():
         command = ('gst-launch -v v4l2src device=/dev/video0 ! "video/'
                    'x-raw-yuv,width=640,height=480" !  x264enc pass=qual '
-                   'quantizer=20 tune=zerolatency ! rtph264pay '
+                   'quantizer=20 tune=zerolatency ! avimux '
                    '! udpsink port=9999')
         subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=-1,
                          shell=True)
