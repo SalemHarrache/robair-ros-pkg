@@ -32,23 +32,28 @@ class RemoteXMPPProxy(object):
         self.client = client
         self.remote_jid = remote_jid
 
-        result = self.client['xep_0199'].send_ping(self.remote_jid,
-                                                   timeout=10,
-                                                   errorfalse=True)
-        LOGGER.debug("%s" % result)
-        if not result:
-            LOGGER.info("Couldn't ping %s" % self.remote_jid)
-            return result
-        else:
-            return True
+        @retry(tries=3, delay=1)
+        def ping():
+            LOGGER.debug("Try to ping %s" % self.remote_jid)
+            result = self.client['xep_0199'].send_ping(self.remote_jid,
+                                                       timeout=10,
+                                                       errorfalse=True)
+            LOGGER.debug("%s" % result)
+            if not result:
+                LOGGER.info("Couldn't ping %s" % self.remote_jid)
+                return result
+            else:
+                return True
+
         if not ping():
-            message = "remote %s XMPP agent is unavailable" % self.remote_jid
+            message = "remote XMPP agent (%s) is unavailable" % self.remote_jid
             raise RemoteXMPPException(message)
 
-    def __getattribute__(self, name):
-        import pdb; pdb.set_trace()
-        1 / 0
-        return getattr(object.__getattribute__(self, "_obj"), name)
+    def __rpc(self, name, *args, **kwargs):
+        print("remote_method : %s %s" % (args, kwargs))
+
+    def __getattr__(self, name):
+        return lambda *args, **kwargs: self.__rpc(name, args, kwargs)
 
 
 class BotXMPP(ClientXMPP):
