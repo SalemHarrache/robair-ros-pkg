@@ -41,8 +41,8 @@ def run_gstreamer():
     server_socket = socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_socket.bind(address)
     while(1):
-        print "We got a client "
         recv_data, addr = server_socket.recvfrom(2048)
+        print "We got a client "
         print recv_data
         if recv_data == 'I_wanna_see_you':
             #boucle sur udpsink mais je ne sais pas comment on fait
