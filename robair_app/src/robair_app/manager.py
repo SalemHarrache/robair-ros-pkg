@@ -24,6 +24,9 @@ class ClientBot(BotXMPP):
         password = rospy.get_param('tv_jabber_password')
         self.robot_jid = rospy.get_param('robot_jabber_id')
         super(ClientBot, self).__init__(jid, password, node_name)
+        self.robbot_proxy = self.get_proxy(self.robot_jid)
+
+
 
     #     self.topic_name = "/info/battery"
     #     rospy.Subscriber(self.topic_name, Command, self.callback)

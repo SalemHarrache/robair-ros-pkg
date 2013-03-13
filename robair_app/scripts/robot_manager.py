@@ -14,11 +14,8 @@ if __name__ == '__main__':
 
     xmpp = RobBot(node_name)
 
-    xmpp.connect()
-    xmpp.process(block=False)
     rospy.loginfo("%s running..." % node_name)
     rospy.spin()
     rospy.loginfo("%s stopping..." % node_name)
     xmpp.disconnect()
-
     rospy.loginfo("%s stopped." % node_name)
