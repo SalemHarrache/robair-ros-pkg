@@ -3,7 +3,7 @@ SHELL := /bin/bash
 # these files should pass pyflakes
 PYFLAKES_WHITELIST=$(shell find . -name "*.py" ! -path "./doc/*" \
                     ! -path "./.tox/*" ! -path "*/compat.py" \
-                    ! -path */build/* ! -path */_*.py)
+                    ! -path "*/build/*" ! -path "*/_*.py")
 
 test:
 	tox
