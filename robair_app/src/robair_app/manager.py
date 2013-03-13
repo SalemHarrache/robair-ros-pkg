@@ -29,7 +29,7 @@ class ClientManager(ClientXMPP):
         super(ClientManager, self).__init__(self.jid, self.password)
         rospy.init_node(self.node_name)
         self.robot_jid = rospy.get_param('robot_jabber_id')
-        self.robot = self.get_proxy(self.robot_jid)
+        self.proxy_robot = self.get_proxy(self.robot_jid)
 
     #     self.topic_name = "/info/battery"
     #     rospy.Subscriber(self.topic_name, Command, self.callback)

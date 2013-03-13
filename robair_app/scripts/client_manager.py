@@ -12,7 +12,8 @@ from robair_app.manager import ClientBot
 if __name__ == '__main__':
     node_name = os.path.basename(__file__).strip('.py')
     xmpp = ClientBot(node_name)
-    xmpp.send_message('robair@quicker.fr', 'Hello Robair!')
+
+    xmpp.robbot.add(3, 5)
 
     rospy.loginfo("%s running..." % node_name)
     rospy.spin()
