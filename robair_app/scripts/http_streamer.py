@@ -12,18 +12,19 @@ app = Flask(__name__)
 app.secret_key = 'blablabla'
 
 
-@app.route('/webcam.ogg', methods=["GET"])
+@app.route('/', methods=["GET"])
 def video():
-    return Response(video_stream_tcp(), mimetype='video/ogg')
+    return Response(video_stream_tcp(), mimetype='video/x264')
 
 
 @app.before_first_request
 def run_gstreamer():
     def gstreamer_task():
-        command = ('gst-launch v4l2src ! videorate '
-                   '! "video/x-raw-yuv,width=320,height=240,framerate=25/1" '
-                   '! queue ! videorate ! theoraenc ! oggmux '
-                   '! tcpserversink port=9999')
+
+        command = ('gst-launch v4l2src  ! decodebin ! queue ! ffmpegcolorspace'
+                   '! x264enc byte-stream=true bitrate=200 bframes=4 ref=1'
+                   'me=dia subme=1 weightb=true threads=0 ! avimux ! '
+                   'tcpserversink port=9999')
         subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=-1,
                          shell=True)
     gstreamer_worker = multiprocessing.Process(target=gstreamer_task)
@@ -42,7 +43,7 @@ def video_stream_udp():
 
 
 def video_stream_tcp():
-    buffer_size = 10000
+    buffer_size = 100
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('', 9999))
     while True:
