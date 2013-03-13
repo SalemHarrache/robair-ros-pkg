@@ -1,13 +1,16 @@
 import rospy
-from .xmpp import BotXMPP, remote
+from .xmpp.client import ClientXMPP
+from .xmpp.rpc import remote
 # from robair_msgs.msg import Command
 
 
-class RobBot(BotXMPP):
+class RobotManager(ClientXMPP):
     def __init__(self, node_name):
-        jid = rospy.get_param('robot_jabber_id')
-        password = rospy.get_param('robot_jabber_password')
-        super(RobBot, self).__init__(jid, password, node_name)
+        self.jid = rospy.get_param('robot_jabber_id')
+        self.password = rospy.get_param('robot_jabber_password')
+        self.node_name = node_name
+        super(RobotManager, self).__init__(self.jid, self.password)
+        rospy.init_node(self.node_name)
 
     @remote
     def echo(self, message):
@@ -15,18 +18,18 @@ class RobBot(BotXMPP):
 
     @remote
     def add(self, *args):
-        return sum([int(i) for i in args])
+        return sum((int(i) for i in args))
 
 
-class ClientBot(BotXMPP):
+class ClientManager(ClientXMPP):
     def __init__(self, node_name):
-        jid = rospy.get_param('tv_jabber_id')
-        password = rospy.get_param('tv_jabber_password')
+        self.jid = rospy.get_param('tv_jabber_id')
+        self.password = rospy.get_param('tv_jabber_password')
+        self.node_name = node_name
+        super(ClientManager, self).__init__(self.jid, self.password)
+        rospy.init_node(self.node_name)
         self.robot_jid = rospy.get_param('robot_jabber_id')
-        super(ClientBot, self).__init__(jid, password, node_name)
-        self.robbot_proxy = self.get_proxy(self.robot_jid)
-
-
+        self.robot = self.get_proxy(self.robot_jid)
 
     #     self.topic_name = "/info/battery"
     #     rospy.Subscriber(self.topic_name, Command, self.callback)
