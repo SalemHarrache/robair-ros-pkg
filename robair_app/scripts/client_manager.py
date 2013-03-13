@@ -6,14 +6,14 @@ import rospy
 
 roslib.load_manifest('robair_app')
 
-from robair_app.manager import ClientBot
+from robair_app.manager import ClientManager
 
 
 if __name__ == '__main__':
     node_name = os.path.basename(__file__).strip('.py')
-    xmpp = ClientBot(node_name)
-
-    xmpp.robbot.add(3, 5)
+    xmpp = ClientManager(node_name)
+    # first test > \o/
+    assert xmpp.proxy_robot.add(3, 5) == 8
 
     rospy.loginfo("%s running..." % node_name)
     rospy.spin()
