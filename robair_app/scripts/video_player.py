@@ -7,7 +7,7 @@ from PySide.phonon import Phonon
 app = QApplication([])
 app.setApplicationName('Phonon Video Player')
 
-file_path = 'http://127.0.0.1:9090/webcam.ogg'
+file_path = 'http://127.0.0.1:9090/'
 media_src = Phonon.MediaSource(file_path)
 
 media_obj = Phonon.MediaObject()
