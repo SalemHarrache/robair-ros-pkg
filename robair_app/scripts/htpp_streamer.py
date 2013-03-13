@@ -14,33 +14,40 @@ app.secret_key = 'blablabla'
 
 @app.route('/webcam.ogg', methods=["GET"])
 def video():
-    return Response(video_stream(), mimetype='video/ogg')
+    return Response(video_stream_tcp(), mimetype='video/ogg')
 
 
-def video_stream():
-    def run_gstreamer():
-        command = ('gst-launch-0.10 videotestsrc ! queue ! videorate '
-                   ' ! "video/x-raw-yuv,width=640,'
-                   'height=480,framerate=15/1" ! queue ! theoraenc '
-                   'quality=15 ! queue ! muxout. pulsesrc ! audio/x-'
-                   'raw-int,rate=22000,channels=1,width=16 ! queue '
-                   '! audioconvert ! vorbisenc ! queue ! muxout. '
-                   'oggmux name=muxout ! tcpserversink port=9999')
+@app.before_first_request
+def run_gstreamer():
+    def gstreamer_task():
+        command = ('gst-launch v4l2src ! videorate '
+                   '! "video/x-raw-yuv,width=320,height=240,framerate=25/1" '
+                   '! queue ! videorate ! theoraenc ! oggmux '
+                   '! tcpserversink port=9999')
         subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=-1,
                          shell=True)
-    gstreamer_worker = multiprocessing.Process(target=run_gstreamer)
+    gstreamer_worker = multiprocessing.Process(target=gstreamer_task)
     gstreamer_worker.start()
+
+
+def video_stream_udp():
+    buffer_size = 10000
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.bind(('', 9999))
+    s.setblocking(0)
+    while True:
+        print("looping...")
+        readable = select([s], [], [])
+        yield readable[0][0].recv(buffer_size)
+
+
+def video_stream_tcp():
+    buffer_size = 10000
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('', 9999))
     while True:
-        readable = select([s], [], [], 0.1)[0]
-        for s in readable:
-            data = s.recv(10000)
-            if not data:
-                break
-            yield data
-    gstreamer_worker.terminate()
-    gstreamer_worker.join()
+        readable = select([s], [], [])
+        yield readable[0][0].recv(buffer_size)
 
 
 def run():
