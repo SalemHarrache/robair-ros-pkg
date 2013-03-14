@@ -13,7 +13,7 @@ if __name__ == '__main__':
     node_name = os.path.basename(__file__).strip('.py')
     xmpp = ClientManager(node_name)
     # first test > \o/
-    assert xmpp.proxy_robot.add(3, 5) == 8
+    assert xmpp.proxy_robot.add(-5, 3, 3) == 1
 
     rospy.loginfo("%s running..." % node_name)
     rospy.spin()
