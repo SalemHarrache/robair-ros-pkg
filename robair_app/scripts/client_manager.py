@@ -15,6 +15,7 @@ if __name__ == '__main__':
     # first test > \o/
     assert xmpp.proxy_robot.add(-5, 3, 3) == 1
     assert xmpp.proxy_robot.echo(message="test") == "test"
+    xmpp.proxy_robot.inexistant_method()
 
     rospy.loginfo("%s running..." % node_name)
     rospy.spin()

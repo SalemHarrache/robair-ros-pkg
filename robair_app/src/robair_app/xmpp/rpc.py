@@ -21,30 +21,31 @@ def remote(*args, **kwargs):
 
 class RemoteXMPPException(Exception):
     '''Exception that happens when the remote method call failled'''
-    pass
+    def __str__(self):
+        return self.message
 
 
 class RemoteXMPPTimeout(Exception):
     '''Exception that happens when the remote method call failled'''
     def __str__(self):
-        return self.__doc__
+        return self.message
 
 
 class RemoteXMPPProxy(object):
     """ RemoteXMPPProxy """
     def __init__(self, client, remote_jid):
-        if not self.ping(remote_jid):
-            raise RemoteXMPPException("remote XMPP agent (%s) is unavailable"
-                                      % remote_jid)
         self.client = client
         self.remote_jid = remote_jid
+        if not self.__rpc_ping():
+            raise RemoteXMPPException("remote XMPP agent (%s) is unavailable"
+                                      % remote_jid)
         self.queue = self.client.response_queue
 
     @retry(tries=3, delay=1)
-    def __rpc_ping(self, remote_jid):
+    def __rpc_ping(self):
         LOGGER.info("Try to ping %s" % self.remote_jid)
         result = self.client['xep_0199'].send_ping(self.remote_jid,
-                                                   timeout=10,
+                                                   timeout=5,
                                                    errorfalse=True)
         LOGGER.debug("%s" % result)
         if not result:
@@ -52,7 +53,7 @@ class RemoteXMPPProxy(object):
         else:
             return True
 
-    def __rpc_wait_response(self, excepted_request_id, timeout=10):
+    def __rpc_wait_response(self, excepted_request_id, timeout=5):
         remaining_timeout = timeout
         timeout_step = 0.1
         while True:
