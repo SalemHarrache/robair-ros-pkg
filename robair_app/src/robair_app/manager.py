@@ -6,10 +6,10 @@ from .xmpp.rpc import remote
 
 class RobotManager(ClientXMPP):
     def __init__(self, node_name):
-        self.jid = rospy.get_param('robot_jabber_id')
-        self.password = rospy.get_param('robot_jabber_password')
+        jid = rospy.get_param('robot_jabber_id')
+        password = rospy.get_param('robot_jabber_password')
         self.node_name = node_name
-        super(RobotManager, self).__init__(self.jid, self.password)
+        super(RobotManager, self).__init__(jid, password)
         rospy.init_node(self.node_name)
 
     @remote
@@ -23,10 +23,10 @@ class RobotManager(ClientXMPP):
 
 class ClientManager(ClientXMPP):
     def __init__(self, node_name):
-        self.jid = rospy.get_param('tv_jabber_id')
-        self.password = rospy.get_param('tv_jabber_password')
+        jid = rospy.get_param('tv_jabber_id')
+        password = rospy.get_param('tv_jabber_password')
         self.node_name = node_name
-        super(ClientManager, self).__init__(self.jid, self.password)
+        super(ClientManager, self).__init__(jid, password)
         rospy.init_node(self.node_name)
         self.robot_jid = rospy.get_param('robot_jabber_id')
         self.proxy_robot = self.get_proxy(self.robot_jid)
