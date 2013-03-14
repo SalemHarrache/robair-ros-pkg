@@ -2,7 +2,6 @@ import uuid
 import cPickle as pickle
 from robair_common.logger import LOGGER
 from robair_common.utils import retry
-from threading import TimeoutError
 from Queue import Empty
 
 
@@ -36,7 +35,7 @@ class RemoteXMPPProxy(object):
     def __init__(self, client, remote_jid):
         self.client = client
         self.remote_jid = remote_jid
-        self.response_queue = self.client.response_queue
+        self.queue = self.client.response_queue
 
         @retry(tries=3, delay=1)
         def ping():
@@ -55,34 +54,34 @@ class RemoteXMPPProxy(object):
             message = "remote XMPP agent (%s) is unavailable" % self.remote_jid
             raise RemoteXMPPException(message)
 
-    def __rpc_wait_reply(self, excepted_request_id, timeout=10):
+    def __rpc_wait_response(self, excepted_request_id, timeout=10):
         remaining_timeout = timeout
         timeout_step = 0.1
         while True:
             try:
-                rpc_message = self.response_queue.get(block=True,
-                                                      timeout=timeout_step)
+                rpc_message = self.queue.get(timeout=timeout_step)
                 # TODO: avoid memory leak by removing orphan RPC responses
                 if rpc_message.request_id == excepted_request_id:
                     return rpc_message.data
                 else:
                     self.response_queue.put(rpc_message)
-                remaining_timeout = remaining_timeout - timeout_step
-                if remaining_timeout <= 0:
-                    raise RemoteXMPPTimeout()
-            except (TimeoutError, Empty):
+            except Empty:
                 pass
             except KeyboardInterrupt:
                 break
+            remaining_timeout = remaining_timeout - timeout_step
+            if remaining_timeout <= 0:
+                raise RemoteXMPPTimeout()
 
     def __rpc_send(self, name, *args, **kwargs):
+
         LOGGER.debug('run remote_method %s(%s, %s)' % (name, args, kwargs))
-        query = RPCRequest(name, *args, **kwargs).dumps()
-        self.client.send_message(query, self.remote_jid)
-        return self.__rpc_wait_response(query.id)
+        rpc_request = RPCRequest(name, *args, **kwargs)
+        self.client.send_message(self.remote_jid, rpc_request.dumps())
+        return self.__rpc_wait_response(rpc_request.id)
 
     def __getattr__(self, name):
-        return lambda *args, **kwargs: self.__rpc_send(name, args, kwargs)
+        return lambda *args, **kwargs: self.__rpc_send(name, *args, **kwargs)
 
 
 class RPCMessage(object):
@@ -105,9 +104,9 @@ class RPCRequest(RPCMessage):
         self.kwargs = kwargs
 
     def __str__(self):
-        return "RPCRequest('%s', *%s, **%s)" % (repr(self.proc_name),
-                                                repr(self.args),
-                                                repr(self.kwargs))
+        return "RPCRequest(%s, *%s, **%s)" % (repr(self.proc_name),
+                                              repr(self.args),
+                                              repr(self.kwargs))
 
 
 class RPCResponse(RPCMessage):
@@ -117,5 +116,5 @@ class RPCResponse(RPCMessage):
         self.data = data
 
     def __str__(self):
-        return "RPCResponse('%s', %s)" % (repr(self.request_id),
-                                          repr(self.data))
+        return "RPCResponse(%s, %s)" % (repr(self.request_id),
+                                        repr(self.data))
