@@ -1,9 +1,10 @@
 <launch>
-
+  <arg name="robot_jid" default="robair@im.quicker.fr" />
   <arg name="jid" default="tv@im.quicker.fr" />
   <arg name="password" default="tv" />
   <param name="tv_jabber_id" value="$(arg jid)"/>
   <param name="tv_jabber_password" value="$(arg password)"/>
+  <param name="robot_jabber_id" value="$(arg robot_jid)"/>
 
   <node pkg="robair_app" type="client_manager.py" name="client_manager" required="true" output="screen"/>
 

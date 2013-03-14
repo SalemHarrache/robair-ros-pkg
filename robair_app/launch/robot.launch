@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="jid" default="robair@im.quicker.fr "/>
+  <arg name="jid" default="robair@im.quicker.fr"/>
   <arg name="password" default="robair" />
   <param name="robot_jabber_id" value="$(arg jid)"/>
   <param name="logger_level" value="DEBUG"/>
