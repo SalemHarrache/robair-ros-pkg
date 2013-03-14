@@ -14,6 +14,7 @@ if __name__ == '__main__':
     xmpp = ClientManager(node_name)
     # first test > \o/
     assert xmpp.proxy_robot.add(-5, 3, 3) == 1
+    assert xmpp.proxy_robot.echo(message="test") == "test"
 
     rospy.loginfo("%s running..." % node_name)
     rospy.spin()
