@@ -1,4 +1,4 @@
-import Queue
+from Queue import Queue
 import inspect
 import sleekxmpp
 
@@ -11,10 +11,9 @@ class ClientXMPP(sleekxmpp.ClientXMPP):
 
     def __init__(self, jid, password):
         super(ClientXMPP, self).__init__(jid, password)
-        self.request_queue = Queue()
         self.response_queue = Queue()
         self.add_event_handler("session_start", self.session_start)
-        self.add_event_handler("message", self.message_handler)
+        self.add_event_handler("message", self.message_handler, threaded=True)
         self.load_plugin()
 
         self.remote_cmds = {}
@@ -26,10 +25,11 @@ class ClientXMPP(sleekxmpp.ClientXMPP):
 
         self.connect()
         self.process()
+        # import ipdb; ipdb.set_trace()
 
     def process(self):
         # TODO: use additional worker for threaded rpc methods
-        super(ClientXMPP, self).process(block=False)
+        super(ClientXMPP, self).process(Block=False)
 
     def get_proxy(self, jid):
         return RemoteXMPPProxy(self, jid)
@@ -39,33 +39,35 @@ class ClientXMPP(sleekxmpp.ClientXMPP):
         self.get_roster()
 
     def message_handler(self, msg):
-        LOGGER.debug("%s read: %s" % (self.__class__.__name__, msg['body']))
         if (msg['type'] not in ('chat', 'normal')
                 or msg['body'] == ''):
             return
         try:
             rpc_message = RPCMessage.loads(msg['body'])
+            LOGGER.info("read rpc_message: %s" % rpc_message)
             if isinstance(rpc_message, RPCRequest):
-                self.request_handler(rpc_message)
-                # self.request_queue.put(rpc_message)
-            elif isinstance(rpc_message, RPCResponse()):
+                LOGGER.debug("response_queue.put(%s)" % rpc_message)
+                self.request_handler(rpc_message, msg['from'])
+            elif isinstance(rpc_message, RPCResponse):
                 self.response_queue.put(rpc_message)
         except:
             pass
 
-    def request_handler(self, request):
+    def request_handler(self, request, jid):
         # TODO: Most be threaded !
         LOGGER.debug("cmd : %s :: args : %s :: kwargs : %s" %
                      (request.proc_name, request.args, request.kwargs))
         if request.proc_name in self.remote_cmds:
             func = self.remote_cmds[request.proc_name]
             try:
-                result = func(*request.args, **request.kwargs)
+                args, kwargs = request.args, request.kwargs
+                result = func(*args, **kwargs)
                 rpc_response = RPCResponse(request.id, result)
             except Exception as e:
+                print(e.message)
                 exception = RemoteXMPPException(e.message)
                 rpc_response = RPCResponse(request.id, exception)
-            self.client.send_message(rpc_response.dumps(), self.remote_jid)
+            self.send_message(jid, rpc_response.dumps())
 
     def send_message(self, dest, mbody):
         super(ClientXMPP, self).send_message(mto=dest,
