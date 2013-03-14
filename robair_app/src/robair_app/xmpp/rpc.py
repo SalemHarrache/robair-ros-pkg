@@ -76,7 +76,10 @@ class RemoteXMPPProxy(object):
         LOGGER.info('run remote_method %s(%s, %s)' % (name, args, kwargs))
         rpc_request = RPCRequest(name, *args, **kwargs)
         self.client.send_message(self.remote_jid, rpc_request.dumps())
-        return self.__rpc_wait_response(rpc_request.id)
+        response = self.__rpc_wait_response(rpc_request.id)
+        if isinstance(response, Exception):
+            raise response
+        return response
 
     def __getattr__(self, name):
         return lambda *args, **kwargs: self.__rpc_send(name, *args, **kwargs)
