@@ -13,6 +13,10 @@ class RobotManager(ClientXMPP):
         rospy.init_node(self.node_name)
 
     @remote
+    def div(self, a, b):
+        return a / b
+
+    @remote
     def echo(self, message):
         return message
 
@@ -30,6 +34,8 @@ class ClientManager(ClientXMPP):
         rospy.init_node(self.node_name)
         self.robot_jid = rospy.get_param('robot_jabber_id')
         self.proxy_robot = self.get_proxy(self.robot_jid)
+
+        self.proxy_robot
 
     #     self.topic_name = "/info/battery"
     #     rospy.Subscriber(self.topic_name, Command, self.callback)

@@ -7,6 +7,7 @@ import rospy
 roslib.load_manifest('robair_app')
 
 from robair_app.manager import ClientManager
+from robair_app.xmpp.rpc import RemoteXMPPTimeout
 
 
 if __name__ == '__main__':
@@ -15,7 +16,12 @@ if __name__ == '__main__':
     # first test > \o/
     assert xmpp.proxy_robot.add(-5, 3, 3) == 1
     assert xmpp.proxy_robot.echo(message="test") == "test"
-    xmpp.proxy_robot.inexistant_method()
+    try:
+        xmpp.proxy_robot.inexistant_method()
+    except Exception as e:
+        assert isinstance(e, RemoteXMPPTimeout)
+
+    xmpp.proxy_robot.div(1, 0)
 
     rospy.loginfo("%s running..." % node_name)
     rospy.spin()
