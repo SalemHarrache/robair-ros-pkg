@@ -33,26 +33,24 @@ class RemoteXMPPTimeout(Exception):
 class RemoteXMPPProxy(object):
     """ RemoteXMPPProxy """
     def __init__(self, client, remote_jid):
+        if not self.ping(remote_jid):
+            raise RemoteXMPPException("remote XMPP agent (%s) is unavailable"
+                                      % remote_jid)
         self.client = client
         self.remote_jid = remote_jid
         self.queue = self.client.response_queue
 
-        @retry(tries=3, delay=1)
-        def ping():
-            LOGGER.debug("Try to ping %s" % self.remote_jid)
-            result = self.client['xep_0199'].send_ping(self.remote_jid,
-                                                       timeout=10,
-                                                       errorfalse=True)
-            LOGGER.debug("%s" % result)
-            if not result:
-                LOGGER.info("Couldn't ping %s" % self.remote_jid)
-                return result
-            else:
-                return True
-
-        if not ping():
-            message = "remote XMPP agent (%s) is unavailable" % self.remote_jid
-            raise RemoteXMPPException(message)
+    @retry(tries=3, delay=1)
+    def __rpc_ping(self, remote_jid):
+        LOGGER.info("Try to ping %s" % self.remote_jid)
+        result = self.client['xep_0199'].send_ping(self.remote_jid,
+                                                   timeout=10,
+                                                   errorfalse=True)
+        LOGGER.debug("%s" % result)
+        if not result:
+            LOGGER.info("Couldn't ping %s" % self.remote_jid)
+        else:
+            return True
 
     def __rpc_wait_response(self, excepted_request_id, timeout=10):
         remaining_timeout = timeout
@@ -74,8 +72,7 @@ class RemoteXMPPProxy(object):
                 raise RemoteXMPPTimeout()
 
     def __rpc_send(self, name, *args, **kwargs):
-
-        LOGGER.debug('run remote_method %s(%s, %s)' % (name, args, kwargs))
+        LOGGER.info('run remote_method %s(%s, %s)' % (name, args, kwargs))
         rpc_request = RPCRequest(name, *args, **kwargs)
         self.client.send_message(self.remote_jid, rpc_request.dumps())
         return self.__rpc_wait_response(rpc_request.id)
