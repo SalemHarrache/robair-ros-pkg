@@ -119,3 +119,18 @@ class RPCResponse(RPCMessage):
     def __str__(self):
         return "RPCResponse(%s, %s)" % (repr(self.request_id),
                                         repr(self.data))
+
+
+class RPCSession(object):
+    def __init__(self, message, request):
+        self.message_subject = message['subject']
+        self.message_content = message['body']
+        self.client_jid = message['from']
+        self.serveur_jid = message['to']
+        self.request_id = request.id
+
+    def __str__(self):
+        return "RPCSession(%s, %s)" % (self.client_jid, self.serveur_jid)
+
+    def __repr__(self):
+        return "%s" % self
