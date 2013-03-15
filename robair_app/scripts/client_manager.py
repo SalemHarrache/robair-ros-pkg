@@ -15,16 +15,20 @@ if __name__ == '__main__':
     xmpp = ClientManager(node_name)
     # first test > \o/
     assert xmpp.proxy_robot.add(-5, 3, 3) == 1
+
     assert xmpp.proxy_robot.echo(message="test") == "test"
     try:
         xmpp.proxy_robot.inexistant_method()
     except Exception as e:
         assert isinstance(e, RemoteXMPPTimeout)
 
-    xmpp.proxy_robot.div(1, 0)
+    # xmpp.proxy_robot.div(1, 0)
+
+    print xmpp.proxy_robot.whoami()
+    print xmpp.jid
 
     rospy.loginfo("%s running..." % node_name)
-    rospy.spin()
+    #rospy.spin()
     rospy.loginfo("%s stopping..." % node_name)
     xmpp.disconnect()
     rospy.loginfo("%s stopped." % node_name)

@@ -23,6 +23,10 @@ class RobotManager(ClientXMPP):
     def add(self, *args):
         return sum((int(i) for i in args))
 
+    @remote
+    def whoami(self):
+        return self.current_rpc_session().client_jid
+
 
 class ClientManager(ClientXMPP):
     def __init__(self, node_name):
