@@ -5,6 +5,8 @@ import errno
 import os
 import signal
 import time
+import threading
+from contextlib import contextmanager
 
 
 class retry(object):
@@ -57,5 +59,48 @@ def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
             return result
 
         return wraps(func)(wrapper)
+
+    return decorator
+
+
+@contextmanager
+def thread_context(**kwargs):
+    """ Context manager that save any context bject in the thread local
+        context.
+    """
+    threadlocal = threading.local()
+    for key, value in kwargs.items():
+        setattr(threadlocal, key, value)
+    yield
+
+
+def thread(*proxy_args, **proxy_kwargs):
+
+    fire = proxy_kwargs.pop('fire', False) or proxy_args or proxy_kwargs
+
+    def decorator(func):
+
+        if fire:
+
+            @wraps(func)
+            def fun(*args, **kwargs):
+                func(*args, **kwargs)
+
+            fun.thread = threading.Thread(target=fun, args=proxy_args,
+                                          kwargs=proxy_kwargs)
+            fun.thread.start()
+
+            return fun
+
+        else:
+
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                thread = threading.Thread(target=func, args=args,
+                                          kwargs=kwargs)
+                thread.start()
+                return thread
+
+            return wrapper
 
     return decorator
