@@ -8,9 +8,8 @@ class RobotManager(ClientXMPP):
     def __init__(self, node_name):
         jid = rospy.get_param('robot_jabber_id')
         password = rospy.get_param('robot_jabber_password')
-        self.node_name = node_name
         super(RobotManager, self).__init__(jid, password)
-        rospy.init_node(self.node_name)
+        rospy.init_node(node_name)
 
     @remote
     def div(self, a, b):
@@ -29,13 +28,11 @@ class ClientManager(ClientXMPP):
     def __init__(self, node_name):
         jid = rospy.get_param('tv_jabber_id')
         password = rospy.get_param('tv_jabber_password')
-        self.node_name = node_name
         super(ClientManager, self).__init__(jid, password)
-        rospy.init_node(self.node_name)
+        rospy.init_node(node_name)
         self.robot_jid = rospy.get_param('robot_jabber_id')
         self.proxy_robot = self.get_proxy(self.robot_jid)
 
-        self.proxy_robot
 
     #     self.topic_name = "/info/battery"
     #     rospy.Subscriber(self.topic_name, Command, self.callback)
