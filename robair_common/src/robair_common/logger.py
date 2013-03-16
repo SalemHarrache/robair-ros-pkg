@@ -35,6 +35,3 @@ def get_logger():
     logger.setLevel(level)
     logger.addHandler(stream_handler)
     return logger
-
-
-LOGGER = get_logger()
