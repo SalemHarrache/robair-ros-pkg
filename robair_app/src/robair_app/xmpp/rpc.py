@@ -1,6 +1,6 @@
 import uuid
 import cPickle as pickle
-from robair_common.logger import LOGGER
+from robair_common import log
 from robair_common.utils import retry
 from Queue import Empty
 
@@ -43,17 +43,17 @@ class RemoteXMPPProxy(object):
 
     @retry(tries=3, delay=1)
     def __rpc_ping(self):
-        LOGGER.info("Try to ping %s" % self.remote_jid)
+        log.info("Try to ping %s" % self.remote_jid)
         result = self.client['xep_0199'].send_ping(self.remote_jid,
                                                    timeout=5,
                                                    errorfalse=True)
-        LOGGER.debug("%s" % result)
+        log.debug("%s" % result)
         if not result:
-            LOGGER.info("Couldn't ping %s" % self.remote_jid)
+            log.info("Couldn't ping %s" % self.remote_jid)
         else:
             return True
 
-    def __rpc_wait_response(self, excepted_request_id, timeout=5):
+    def __rpc_wait_response(self, excepted_request_id, timeout=10):
         remaining_timeout = timeout
         timeout_step = 0.1
         while True:
@@ -73,7 +73,7 @@ class RemoteXMPPProxy(object):
                 raise RemoteXMPPTimeout()
 
     def __rpc_send(self, name, *args, **kwargs):
-        LOGGER.info('run remote_method %s(%s, %s)' % (name, args, kwargs))
+        log.info('run remote_method %s(%s, %s)' % (name, args, kwargs))
         rpc_request = RPCRequest(name, *args, **kwargs)
         self.client.send_message(self.remote_jid, rpc_request.dumps())
         response = self.__rpc_wait_response(rpc_request.id)
@@ -123,10 +123,8 @@ class RPCResponse(RPCMessage):
 
 class RPCSession(object):
     def __init__(self, message, request):
-        self.message_subject = message['subject']
-        self.message_content = message['body']
-        self.client_jid = message['from']
-        self.serveur_jid = message['to']
+        self.client_jid = str(message['from']).split('/')[0]
+        self.serveur_jid = "%s" % message['to']
         self.request_id = request.id
 
     def __str__(self):
