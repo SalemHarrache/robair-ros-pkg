@@ -6,10 +6,10 @@ from .xmpp.rpc import remote
 
 class RobotManager(ClientXMPP):
     def __init__(self, node_name):
+        rospy.init_node(node_name)
         jid = rospy.get_param('robot_jabber_id')
         password = rospy.get_param('robot_jabber_password')
         super(RobotManager, self).__init__(jid, password)
-        rospy.init_node(node_name)
 
     @remote
     def div(self, a, b):
