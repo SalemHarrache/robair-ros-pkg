@@ -22,10 +22,12 @@ if __name__ == '__main__':
     except Exception as e:
         assert isinstance(e, RemoteXMPPTimeout)
 
-    # xmpp.proxy_robot.div(1, 0)
+    # try:
+    #     xmpp.proxy_robot.div(1, 0)
+    # except Exception as e:
+    #     assert type(e) == ZeroDivisionError
 
-    print xmpp.proxy_robot.whoami()
-    print xmpp.jid
+    assert xmpp.proxy_robot.whoami() == xmpp.jid
 
     rospy.loginfo("%s running..." % node_name)
     #rospy.spin()
