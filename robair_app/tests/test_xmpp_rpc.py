@@ -4,6 +4,13 @@ import roslib
 roslib.load_manifest('robair_app')
 
 import rospy
+
+rospy.set_param('logger_level', 'None')
+rospy.set_param('robot_jabber_id', 'robair@im.quicker.fr')
+rospy.set_param('robot_jabber_password', 'robair')
+rospy.set_param('tv_jabber_id', 'tv@im.quicker.fr')
+rospy.set_param('tv_jabber_password', 'tv')
+
 import unittest
 from robair_app.xmpp.client import ClientXMPP
 from robair_app.xmpp.rpc import remote
@@ -44,17 +51,19 @@ class Client(ClientXMPP):
 ## A sample python unit test
 class TestXmppRPC(unittest.TestCase):
     def setUp(self):
+        self.server = Server()
         self.client = Client()
+
+    def tearDown(self):
+        self.server.disconnect()
+        self.client.disconnect()
 
     def test_echo(self):
         self.assertEquals(self.client.proxy.echo(message="test"), "test")
 
+    def test_add(self):
+        self.assertEquals(self.client.proxy.add(3, 3, 3), 9)
 
 if __name__ == '__main__':
     import rosunit
-    rospy.set_param('logger_level', 'DEBUG')
-    rospy.set_param('robot_jabber_id', 'robot@im.quicker.fr')
-    rospy.set_param('robot_jabber_password', 'robot')
-    rospy.set_param('tv_jabber_id', 'tv@im.quicker.fr')
-    rospy.set_param('tv_jabber_password', 'tv')
     rosunit.unitrun('robair_app', 'test_xmpp_rpc', TestXmppRPC)
