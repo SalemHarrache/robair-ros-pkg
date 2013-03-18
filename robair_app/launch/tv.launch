@@ -7,5 +7,6 @@
   <param name="robot_jabber_id" value="$(arg robot_jid)"/>
 
   <node pkg="robair_app" type="client_manager.py" name="client_manager" required="true" output="screen"/>
+  <node pkg="robair_driver" type="keyboard.py" name="keyboard" required="true" output="screen" />
 
 </launch>
