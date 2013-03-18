@@ -9,6 +9,7 @@
   <param name="robot_jabber_password" value="$(arg password)"/>
   <node pkg="robair_driver" type="battery.py" name="battery" required="true" output="screen" />
   <node pkg="robair_driver" type="network.py" name="network" required="true" output="screen" />
+  <node pkg="robair_driver" type="keyboard.py" name="keyboard" required="true" output="screen" />
   <node pkg="robair_app" type="robot_manager.py" name="robot_manager" required="true" output="screen"/>
 
   <!-- Start rviz and load config -->
