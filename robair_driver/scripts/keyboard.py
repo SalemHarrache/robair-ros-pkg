@@ -22,8 +22,9 @@ class KeyboardNode(object):
 
     def key_pressed(self, dtime, modifiers, key):
         directions = {"top": (1, 0), "bottom": (-1, 0),
-                      "left": (None, 1), "right": (1, 90)}
+                      "left": (None, -90), "right": (None, 90)}
         if key in directions.keys():
+            print("%s" % key)
             self.pub.publish(Command(*directions[key]))
 
 

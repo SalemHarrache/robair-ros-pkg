@@ -86,8 +86,9 @@ displayandexec "Install flask (http framework)" pip install -U pep8 flask
 displayandexec "Install sleekxmpp" pip install -U sleekxmpp
 displayandexec "Install dnspython" pip install -U dnspython
 displayandexec "Install nxt-python" pip install -U nxt-python
+displayandexec "Install pyusb" pip install -U pyusb
 
-displaytitlec "Redis"
+displaytitle "Redis"
 displayandexec "Install redis-server" sudo apt-get install redis-server
 displayandexec "Install redis-client" pip install -U redis
 
