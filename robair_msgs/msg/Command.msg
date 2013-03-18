@@ -1,2 +1,2 @@
-int8 speed  # speed [-3, 3]
-int8 curve  # direction [-3, 3]
+int8 speed  # speed [-1, 1]
+int8 curve  # direction [-90, 90]
