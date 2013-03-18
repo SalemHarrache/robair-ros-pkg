@@ -5,9 +5,6 @@ PYFLAKES_WHITELIST=$(shell find . -name "*.py" ! -path "./doc/*" \
                     ! -path "./.tox/*" ! -path "*/compat.py" \
                     ! -path "*/build/*" ! -path "*/_*.py")
 
-test:
-	tox
-
 pyflakes:
 	pyflakes ${PYFLAKES_WHITELIST}
 

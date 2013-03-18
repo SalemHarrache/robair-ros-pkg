@@ -1,6 +1,6 @@
 import uuid
 import cPickle as pickle
-from robair_common.logger import LOGGER
+from robair_common import log
 from robair_common.utils import retry
 from Queue import Empty
 
@@ -21,13 +21,14 @@ def remote(*args, **kwargs):
 
 class RemoteXMPPException(Exception):
     '''Exception that happens when the remote method call failled'''
-    pass
+    def __str__(self):
+        return self.message
 
 
 class RemoteXMPPTimeout(Exception):
     '''Exception that happens when the remote method call failled'''
     def __str__(self):
-        return self.__doc__
+        return self.message
 
 
 class RemoteXMPPProxy(object):
@@ -35,24 +36,22 @@ class RemoteXMPPProxy(object):
     def __init__(self, client, remote_jid):
         self.client = client
         self.remote_jid = remote_jid
+        if not self.__rpc_ping():
+            raise RemoteXMPPException("remote XMPP agent (%s) is unavailable"
+                                      % remote_jid)
         self.queue = self.client.response_queue
 
-        @retry(tries=3, delay=1)
-        def ping():
-            LOGGER.debug("Try to ping %s" % self.remote_jid)
-            result = self.client['xep_0199'].send_ping(self.remote_jid,
-                                                       timeout=10,
-                                                       errorfalse=True)
-            LOGGER.debug("%s" % result)
-            if not result:
-                LOGGER.info("Couldn't ping %s" % self.remote_jid)
-                return result
-            else:
-                return True
-
-        if not ping():
-            message = "remote XMPP agent (%s) is unavailable" % self.remote_jid
-            raise RemoteXMPPException(message)
+    @retry(tries=3, delay=1)
+    def __rpc_ping(self):
+        log.info("Try to ping %s" % self.remote_jid)
+        result = self.client['xep_0199'].send_ping(self.remote_jid,
+                                                   timeout=5,
+                                                   errorfalse=True)
+        log.debug("%s" % result)
+        if not result:
+            log.info("Couldn't ping %s" % self.remote_jid)
+        else:
+            return True
 
     def __rpc_wait_response(self, excepted_request_id, timeout=10):
         remaining_timeout = timeout
@@ -74,11 +73,13 @@ class RemoteXMPPProxy(object):
                 raise RemoteXMPPTimeout()
 
     def __rpc_send(self, name, *args, **kwargs):
-
-        LOGGER.debug('run remote_method %s(%s, %s)' % (name, args, kwargs))
+        log.info('run remote_method %s(%s, %s)' % (name, args, kwargs))
         rpc_request = RPCRequest(name, *args, **kwargs)
         self.client.send_message(self.remote_jid, rpc_request.dumps())
-        return self.__rpc_wait_response(rpc_request.id)
+        response = self.__rpc_wait_response(rpc_request.id)
+        if isinstance(response, Exception):
+            raise response
+        return response
 
     def __getattr__(self, name):
         return lambda *args, **kwargs: self.__rpc_send(name, *args, **kwargs)
@@ -118,3 +119,16 @@ class RPCResponse(RPCMessage):
     def __str__(self):
         return "RPCResponse(%s, %s)" % (repr(self.request_id),
                                         repr(self.data))
+
+
+class RPCSession(object):
+    def __init__(self, message, request):
+        self.client_jid = str(message['from']).split('/')[0]
+        self.serveur_jid = "%s" % message['to']
+        self.request_id = request.id
+
+    def __str__(self):
+        return "RPCSession(%s, %s)" % (self.client_jid, self.serveur_jid)
+
+    def __repr__(self):
+        return "%s" % self

@@ -13,6 +13,7 @@
   <depend package="robair_msgs"/>
   <depend package="robair_driver"/>
   <depend package="robair_common"/>
+  <depend package="rostest" />
 
 </package>
 
