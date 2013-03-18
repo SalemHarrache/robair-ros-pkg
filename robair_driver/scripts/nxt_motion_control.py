@@ -25,5 +25,6 @@ class NxtNode(object):
 if __name__ == '__main__':
     nxt_node = NxtNode()
     rospy.loginfo("%s running..." % nxt_node.node_name)
-    nxt_node.main_loop()
+    # nxt_node.main_loop()
+    rospy.spin()
     rospy.loginfo("%s stopped." % nxt_node.node_name)
