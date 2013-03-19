@@ -3,95 +3,42 @@
 from __future__ import unicode_literals
 from PySide import QtGui
 from PySide.phonon import Phonon
+import multiprocessing
 
-#! /usr/bin/python
-#-*-coding: utf-8 -*-
-from PySide.QtGui import *
-from PySide.QtCore import *
-import os,sys
 
-def main(args):
-    a = QApplication([])
-    a.setApplicationName('Visio Video Player')
-    fenetre = QWidget()
-
-    bouton2 = QPushButton("textComment")
-    bouton3 = QPushButton("notrewebcam")
-
-    monLayout = QGridLayout()
-
-    #####################"VIDEO1####################################"
-    file_path = 'http://127.0.0.1:9090/'
+def get_widget_player(file_path):
     media_src_rem = Phonon.MediaSource(file_path)
     media_obj_rem = Phonon.MediaObject()
     media_obj_rem.setCurrentSource(media_src_rem)
-
-    remote_video_widget = Phonon.VideoWidget()
-    Phonon.createPath(media_obj_rem, remote_video_widget)
-
+    video_widget = Phonon.VideoWidget()
+    Phonon.createPath(media_obj_rem, video_widget)
     audio_out = Phonon.AudioOutput(Phonon.VideoCategory)
     Phonon.createPath(media_obj_rem, audio_out)
+    media_obj_rem.play()
+    return video_widget
 
 
-    #####################"VIDEO2####################################"
-    media_src = Phonon.MediaSource(file_path)
-    media_obj_loc = Phonon.MediaObject()
-    media_obj_loc.setCurrentSource(media_src)
+class VideoStreamPlayer(object):
+    def __init__(self, local_url, remote_url):
+        self.app = QtGui.QApplication([])
+        self.app.setApplicationName('Visio Video Player')
+        self.frame = QtGui.QWidget()
+        self.layout = QtGui.QGridLayout()
 
-    video_widget = Phonon.VideoWidget()
-    Phonon.createPath(media_obj_loc, video_widget)
-    # video_widget.resize(50,50)
-    # audio_out = Phonon.AudioOutput(Phonon.VideoCategory)
-    # Phonon.createPath(media_obj_loc, audio_out)
+        self.layout.addWidget(get_widget_player(local_url), 0, 0, 10, 10)
+        self.layout.addWidget(get_widget_player(remote_url), 0, 0, 10, 10)
 
-    #########################################################"
+        self.process = multiprocessing.Process(target=self.app.exec_)
 
-    monLayout.addWidget(remote_video_widget,0,0,10,10)
+    def show(self):
+        self.frame.show()
+        self.frame.setLayout(self.layout)
+        self.process.start()
 
-    #monLayout.addWidget(bouton2,0,4,1,1)
-    monLayout.addWidget(video_widget,9,9,1,1)
-
-
-
-
-    fenetre.setLayout(monLayout)
-    fenetre.show()
-
-    media_obj_rem.play() #   VIDEO1
-    media_obj_loc.play() #   VIDEO2
-    r=a.exec_()
-    return r
-if __name__=="__main__":
-    main(sys.argv)
+    def dispose(self):
+        self.process.terminate()
+        self.process.join()
 
 
-
-
-
-
-
-
-
-# app = QApplication([])
-# app.setApplicationName('Visio Video Player')
-
-# monLayout = QHBoxLayout()
-
-
-# file_path = 'http://127.0.0.1:9090/'
-# media_src = Phonon.MediaSource(file_path)
-# media_obj = Phonon.MediaObject()
-# media_obj.setCurrentSource(media_src)
-
-# remote_video_widget = Phonon.VideoWidget()
-# Phonon.createPath(media_obj, remote_video_widget)
-
-# audio_out = Phonon.AudioOutput(Phonon.VideoCategory)
-# Phonon.createPath(media_obj, audio_out)
-
-# monLayout.addWidget(remote_video_widget)
-
-# remote_video_widget.show()
-# media_obj.play()
-
-# app.exec_()
+app = VideoStreamPlayer("http://127.0.0.1:9090/", "http://127.0.0.1:9090/")
+app.show()
