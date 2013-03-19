@@ -15,7 +15,7 @@ gitclean:
 	git clean -Xfd
 
 doc:
-	rosrun rosdoc rosdoc $(ls -a | grep robair)
+	rosrun rosdoc rosdoc $(shell ls -a | grep robair)
 
 robot:
 	roslaunch robair_app robot.launch
