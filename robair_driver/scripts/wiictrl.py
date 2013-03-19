@@ -2,6 +2,8 @@
 import roslib
 import cwiid
 import sys
+import threading
+import time
 
 roslib.load_manifest('robair_driver')
 
@@ -22,11 +24,9 @@ class WiimoteNode(threading.Thread):
         self.wiimote_addr=wiimote_addr
         rospy.init_node('wiimote')
 
-    def main_loop(self, direction, speed):
+    def main_loop(self):
 
 	done = lambda: rospy.is_shutdown()
-        print 'Press buttons 1 + 2 on your Wii Remote...'
-        time.sleep(1)
 
         print 'Put Wiimote in discoverable mode now (press 1+2)...'
         if self.wiimote_addr != 0:
@@ -40,8 +40,8 @@ class WiimoteNode(threading.Thread):
 	
 	Rumble = False
         wm.rpt_mode = cwiid.RPT_BTN
-	
-        while not done:
+	speeds={"up":0,"down":0,"left":0,"right":0}
+        while True:
             if wm.state['buttons'] == 512:
                 self.pub.publish(1,None)
 
@@ -49,10 +49,10 @@ class WiimoteNode(threading.Thread):
 		self.pub.publish(-1,None)
 
 	    if wm.state['buttons'] == 2048:
-		self.pub.publish(None, -1)
+		self.pub.publish(None, -90)
 
 	    if wm.state['buttons'] == 1024:
-		self.pub.publish(None, 1)
+		self.pub.publish(None, 90)
 
 	    if wm.state['buttons'] == 4096:
 		print 'closing Bluetooth connection. Good Bye!'

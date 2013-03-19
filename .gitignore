@@ -32,3 +32,4 @@ nosetests.xml
 # Other
 *.py_
 doc
+*.swp
