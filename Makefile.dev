@@ -17,8 +17,11 @@ gitclean:
 doc:
 	rosrun rosdoc rosdoc $(shell ls -a | grep robair)
 
-robot:
-	roslaunch robair_app robot.launch
+robair:
+	roslaunch robair_app robair.launch
 
 tv:
 	roslaunch robair_app tv.launch
+
+nxt:
+	roslaunch robair_app nxt.launch
