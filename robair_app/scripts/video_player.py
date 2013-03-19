@@ -19,7 +19,7 @@ def main(args):
     bouton3 = QPushButton("notrewebcam")
 
     monLayout = QGridLayout()
-    monLayout.columnMinimumWidth ( 11 )
+
     #####################"VIDEO1####################################"
     file_path = 'http://127.0.0.1:9090/'
     media_src_rem = Phonon.MediaSource(file_path)
@@ -27,8 +27,6 @@ def main(args):
     media_obj_rem.setCurrentSource(media_src_rem)
 
     remote_video_widget = Phonon.VideoWidget()
-    # permet d'auto adapter le ratio quand on redimentionne
-    #remote_video_widget.setAspectRatio(Phonon.VideoWidget.AspectRatioWidget)
     Phonon.createPath(media_obj_rem, remote_video_widget)
 
     audio_out = Phonon.AudioOutput(Phonon.VideoCategory)
