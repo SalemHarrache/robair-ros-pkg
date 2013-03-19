@@ -17,7 +17,6 @@ def video():
     return Response(video_stream_tcp(), mimetype='video/mp4')
 
 
-@app.before_first_request
 def run_gstreamer():
     def gstreamer_task():
         command = ('gst-launch v4l2src device=/dev/video0 ! '
@@ -29,6 +28,7 @@ def run_gstreamer():
                          shell=True)
     gstreamer_worker = multiprocessing.Process(target=gstreamer_task)
     gstreamer_worker.start()
+    return gstreamer_worker
 
 
 def video_stream_tcp():
@@ -41,8 +41,11 @@ def video_stream_tcp():
 
 
 def run():
+    gstreamer_worker = run_gstreamer()
     app.debug = False
     app.run(port=9090, threaded=True)
+    gstreamer_worker.terminate()
+    gstreamer_worker.join()
 
 
 server = multiprocessing.Process(target=run)
