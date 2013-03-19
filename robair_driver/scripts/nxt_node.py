@@ -39,14 +39,14 @@ class NxtNode(object):
         speed, degrees = self.current_cmd.speed, self.current_cmd.curve
         if degrees > 0:
             if speed >= 0:
-                self.motor_a.turn(70, 100)
+                self.motor_a.turn(80, 170)
             else:
-                self.motor_b.turn(-70, 100)
+                self.motor_b.turn(-80, 170)
         elif degrees < 0:
             if speed >= 0:
-                self.motor_b.turn(70, 100)
+                self.motor_b.turn(80, 170)
             else:
-                self.motor_a.turn(-70, 100)
+                self.motor_a.turn(-80, 170)
         self.current_cmd.curve = 0
         if speed > 0:
             self.motor_a.run(power=70)
