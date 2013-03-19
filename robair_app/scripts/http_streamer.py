@@ -14,32 +14,25 @@ app.secret_key = 'blablabla'
 
 @app.route('/', methods=["GET"])
 def video():
-    return Response(video_stream_udp(), mimetype='video/mp4')
+    return Response(video_stream_tcp(), mimetype='video/mp4')
 
 
 @app.before_first_request
 def run_gstreamer():
     def gstreamer_task():
-        command = ('gst-launch -v v4l2src device=/dev/video0 ! "video/'
-                   'x-raw-yuv,width=640,height=480" !  x264enc pass=qual '
-                   'quantizer=20 tune=zerolatency ! avimux '
-                   '! udpsink port=9999')
+        command = ('gst-launch v4l2src device=/dev/video0 ! '
+                   '\'video/x-raw-yuv,width=640,height=480\' ! '
+                   'x264enc pass=qual quantizer=20 tune=zerolatency ! avimux !'
+                   ' tcpserversink  port=9999')
+
         subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=-1,
                          shell=True)
     gstreamer_worker = multiprocessing.Process(target=gstreamer_task)
     gstreamer_worker.start()
 
 
-def video_stream_udp():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(('', 9999))
-    while True:
-        print("looping")
-        yield s.recvfrom(2048)[0]
-
-
 def video_stream_tcp():
-    buffer_size = 100
+    buffer_size = 10000
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('', 9999))
     while True:
