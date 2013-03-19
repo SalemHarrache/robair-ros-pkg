@@ -6,7 +6,7 @@ import select
 import uuid
 import multiprocessing
 
-from flask import Flask, Response, url_for
+from flask import Flask, Response
 
 
 def get_local_ip_address():
@@ -22,19 +22,20 @@ def get_local_ip_address():
 
 
 class HTTPStreamer(object):
-    def __init__(self, debug=True, port=9090, host=None):
+    def __init__(self, debug=False, port=9090, host=None):
         app = Flask(__name__)
         app.secret_key = uuid.uuid4()
+        self.port = port
+        self.host = host or '0.0.0.0'
+        self.local_address = get_local_ip_address()
         app.debug = debug
         app.add_url_rule('/', 'webcam', self.video_stream_response)
-        run_funct = lambda: app.run(port=port,
-                                    host=(host or get_local_ip_address()),
-                                    threaded=True)
+        run_funct = lambda: app.run(port=port, host=host, threaded=True)
         self.server = multiprocessing.Process(target=run_funct)
 
     def video_stream_response(self):
         def video_stream_tcp():
-            buffer_size = 10000
+            buffer_size = 1000
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect(('', 9999))
             while True:
@@ -44,7 +45,8 @@ class HTTPStreamer(object):
 
     @property
     def url(self):
-        return url_for('webcam', _external=True)
+        # this is the small hack for using local network ip address
+        return "http://%s:%s/" % (self.local_address, self.port)
 
     def display(self, remote_host):
         pass
@@ -59,9 +61,6 @@ class HTTPStreamer(object):
 
 if __name__ == "__main__":
     server = HTTPStreamer()
-    try:
-        print('HttpStreamer serve forever')
-        server.start()
-    except KeyboardInterrupt:
-        server.stop()
-        print('Shutdown HttpStreamer server ...')
+    server.start()
+    print(server.url)
+    # server.stop()
