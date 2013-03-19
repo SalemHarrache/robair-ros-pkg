@@ -40,7 +40,7 @@ def main(args):
 
     video_widget = Phonon.VideoWidget()
     Phonon.createPath(media_obj_loc, video_widget)
-    video_widget.resize(50,50)
+    # video_widget.resize(50,50)
     # audio_out = Phonon.AudioOutput(Phonon.VideoCategory)
     # Phonon.createPath(media_obj_loc, audio_out)
 
@@ -49,7 +49,7 @@ def main(args):
     monLayout.addWidget(remote_video_widget,0,0,10,10)
 
     #monLayout.addWidget(bouton2,0,4,1,1)
-    monLayout.addWidget(video_widget,0,0,1,1)
+    monLayout.addWidget(video_widget,9,9,1,1)
 
 
 
