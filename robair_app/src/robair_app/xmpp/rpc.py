@@ -63,7 +63,7 @@ class RemoteXMPPProxy(object):
                 if rpc_message.request_id == excepted_request_id:
                     return rpc_message.data
                 else:
-                    self.response_queue.put(rpc_message)
+                    self.queue.put(rpc_message)
             except Empty:
                 pass
             except KeyboardInterrupt:

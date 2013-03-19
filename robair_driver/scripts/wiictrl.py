@@ -30,7 +30,9 @@ class WiimoteNode():
 
         wiimoteDevice = wiimote.WIIMote.WIIMote()
         wiimoteDevice.zeroDevice()
-
+        wiiPublisher = CmdSender(wiimoteDevice, freq=100)
+        wiiPublisher.main_loop()
+      
         try:
             wiiPublisher = CmdSender(wiimoteDevice, freq=100)
             wiiPublisher.main_loop()
@@ -87,8 +89,9 @@ class CmdSender():#threading.Thread):
         #self.threadName = "Cmd topic Publisher"
         is_in = lambda x,y,z:x>y and x<z
 
-        try:
-            while not rospy.is_shutdown():
+        #try:
+            #while not rospy.is_shutdown():
+            while True:
                 self.wiistate = self.wiiMote.getWiimoteState()
     	        # Convert acceleration, which is in g's into m/sec^2:
                 canonicalAccel=self.wiistate.acc.scale(EARTH_GRAVITY) 
@@ -101,9 +104,11 @@ class CmdSender():#threading.Thread):
                     self.buttonCtrl=True
                 if self.wiistate.buttons[BTN_A]:
                     self.buttonCtrl=False
-                
+                print self.wiistate.buttons[BTN_A]
+                print "....1...."
                 
                 if buttonCtrl:
+                    print "....2...."
                     (msg.curve, msg.speed)=(0,0)
                     if self.wiistate.buttons[BTN_LEFT]:
                         msg.curve=1
@@ -114,6 +119,7 @@ class CmdSender():#threading.Thread):
                     if self.wiistate.buttons[BTN_DOWN]:
                         msg.speed=11
                 else:
+                    print "....3...."
                     if is_in(abs(canonicalAccel[X]),0,2):
                         msg.curve=0
                     elif is_in(canonicalAccel[X],2,5):
@@ -124,6 +130,7 @@ class CmdSender():#threading.Thread):
                         msg.curve=3
                     if msg.curve > 0:
                         msf.curve+=10
+                    print "....4...."
     
                     if is_in(abs(canonicalAccel[Y]),0,2):
                         msg.speed=0
@@ -136,17 +143,17 @@ class CmdSender():#threading.Thread):
                     if msg.speed > 0:
                         msg.speed+=10
                 
-		try:
-		  self.pub.publish(msg)
-		except rospy.ROSException:
-		  rospy.loginfo("Topic /cmd closed. Shutting down Imu sender.")
-		  exit(0)
+    		#try:
+    		#  self.pub.publish(msg)
+    		#except rospy.ROSException:
+    		#  rospy.loginfo("Topic /cmd closed. Shutting down Imu sender.")
+    		#  exit(0)
                 
                 rospy.sleep(self.sleepDuration)
 
-        except rospy.ROSInterruptException:
-            rospy.loginfo("Shutdown request. Shutting down Cmd sender.")
-            exit(0)
+        #except rospy.ROSInterruptException:
+        #    rospy.loginfo("Shutdown request. Shutting down Cmd sender.")
+        #    exit(0)
 
 
 class WiimoteListeners(threading.Thread):
