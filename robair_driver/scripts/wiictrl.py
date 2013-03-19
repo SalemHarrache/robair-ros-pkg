@@ -4,13 +4,12 @@ import cwiid
 import sys
 import threading
 import time
+import rospy
 
 roslib.load_manifest('robair_driver')
 
-import rospy
 
 from robair_msgs.msg import Command
-from robair_driver import keylogger
 
 
 class WiimoteNode(threading.Thread):
@@ -40,7 +39,7 @@ class WiimoteNode(threading.Thread):
         speedY=0
         is_in = lambda x,y,z:x>y and x<=z
 
-        while True:
+        while not done():
             
 	    if wm.state['buttons'] & cwiid.BTN_HOME:
 		print 'closing Bluetooth connection. Good Bye!'
@@ -101,8 +100,32 @@ class WiimoteNode(threading.Thread):
 
 if __name__ == '__main__':
     wiimote_node = WiimoteNode()
-    rospy.loginfo("%s running..." % wiimote_node.node_name)
-    wiimote_node.main_loop()
-    rospy.loginfo("%s stopped." % wiimote_node.node_name)
+    try:
+        wiimoteNode.main_loop()
 
+    except rospy.ROSInterruptException:
+        rospy.loginfo("ROS Shutdown Request.")
+    except KeyboardInterrupt, e:
+        rospy.loginfo("Received keyboard interrupt.")
+    except WiimoteNotFoundError, e:
+        rospy.logfatal(str(e))
+    except WiimoteEnableError, e:
+        rospy.logfatal(str(e))
+    except CallbackStackMultInstError, e:
+        rospy.logfatal(str(e))
+    except CallbackStackEmptyError, e:
+        rospy.logfatal(str(e))
+    except ResumeNonPausedError, e:
+        rospy.logfatal(str(e))
+    except CallbackStackEmptyError, e:
+        rospy.logfatal(str(e))
+
+    except:
+        excType, excValue, excTraceback = sys.exc_info()[:3]
+        traceback.print_exception(excType, excValue, excTraceback)
+    finally:
+        if (wiimoteNode is not None):
+            wiimoteNode.shutdown()
+        rospy.loginfo("Exiting Wiimote node.")
+        sys.exit(0)
 
