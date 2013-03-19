@@ -11,10 +11,17 @@ class RobotManager(ClientXMPP):
         password = rospy.get_param('robot_jabber_password')
         super(RobotManager, self).__init__(jid, password)
         self.cmd_publisher = rospy.Publisher('/cmd', Command)
+        self.clients = {}
 
     @remote
     def publish_cmd(self, cmd):
         self.cmd_publisher.publish(cmd)
+
+    @remote
+    def hello(self, key):
+        session = self.current_rpc_session()
+        self.clients[session.client_jid] = True
+        return True
 
 
 class ClientManager(ClientXMPP):
