@@ -3,7 +3,6 @@ import requests
 from robair_msgs.msg import Command
 
 from robair_common import log
-from std_msgs.msg import String
 
 from .xmpp.client import ClientXMPP
 from .xmpp.rpc import remote
@@ -15,7 +14,6 @@ class RobotManager(ClientXMPP):
         jid = rospy.get_param('robot_jabber_id')
         password = rospy.get_param('robot_jabber_password')
         super(RobotManager, self).__init__(jid, password)
-        rospy.Subscriber('/info/battery', String, self.forward_distance)
         self.cmd_publisher = rospy.Publisher('/cmd', Command)
         self.clients = {}
 
@@ -30,7 +28,7 @@ class RobotManager(ClientXMPP):
         return authorize
 
     def forward_distance(self, distance):
-        for client in self.clients.items():
+        for client in self.clients.values():
             client.publish_distance(distance)
 
     @remote
@@ -47,7 +45,6 @@ class ClientManager(ClientXMPP):
         password = rospy.get_param('tv_jabber_password')
         super(ClientManager, self).__init__(jid, password)
         rospy.init_node(node_name)
-        self.pub_ultrasonic = rospy.Publisher('/info/battery', String)
         self.robot_jid = rospy.get_param('robot_jabber_id')
         self.proxy_robot = self.get_proxy(self.robot_jid)
         if not self.proxy_robot.hello(self.make_reservation()):
@@ -63,6 +60,3 @@ class ClientManager(ClientXMPP):
             log.info("Error: %s" % data['error_message'])
         else:
             return data['key']
-
-    def publish_distance(self, distance):
-        self.pub_ultrasonic.publish(distance)
