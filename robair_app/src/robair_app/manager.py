@@ -1,8 +1,9 @@
 import rospy
 import requests
+import uuid
+
 from robair_msgs.msg import Command
 
-from robair_common import log
 from robair_common.utils import get_local_ip_address
 
 from .xmpp.client import ClientXMPP
@@ -21,15 +22,21 @@ class RobotManager(ClientXMPP):
 
     @remote
     def hello(self, key):
-        url = rospy.get_param('robair_api_url')
-        r = requests.get(url + "check", params={"key": key})
-        authorize = r.json()['valid']
-        if r.json()['valid']:
-            jid = self.current_rpc_session().client_jid
-            self.clients[jid] = self.get_proxy(jid)
-            run_player(self.get_url_streaming(),
-                       self.clients[jid].get_url_streaming())
-        return authorize
+        # TODO: use ressource manager website !
+        jid = self.current_rpc_session().client_jid
+        self.clients[jid] = self.get_proxy(jid)
+        run_player(self.get_url_streaming(),
+                   self.clients[jid].get_url_streaming())
+        return True
+        # url = rospy.get_param('robair_api_url')
+        # r = requests.get(url + "check", params={"key": key})
+        # authorize = r.json()['valid']
+        # if r.json()['valid']:
+        #     jid = self.current_rpc_session().client_jid
+        #     self.clients[jid] = self.get_proxy(jid)
+        #     run_player(self.get_url_streaming(),
+        #                self.clients[jid].get_url_streaming())
+        # return authorize
 
     def forward_distance(self, distance):
         for client in self.clients.values():
@@ -64,13 +71,15 @@ class ClientManager(ClientXMPP):
         rospy.Subscriber('/cmd', Command, self.proxy_robot.publish_cmd)
 
     def make_reservation(self):
-        url = rospy.get_param('robair_api_url')
-        r = requests.get(url + "new", params={"jid": self.jid})
-        data = r.json()
-        if data['error']:
-            log.info("Error: %s" % data['error_message'])
-        else:
-            return data['key']
+        # TODO: use ressource manager website !
+        # url = rospy.get_param('robair_api_url')
+        # r = requests.get(url + "new", params={"jid": self.jid})
+        # data = r.json()
+        # if data['error']:
+        #     log.info("Error: %s" % data['error_message'])
+        # else:
+        #     return data['key']
+        return uuid.uuid4()
 
     @remote
     def get_url_streaming(self):
