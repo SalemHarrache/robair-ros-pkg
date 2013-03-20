@@ -85,9 +85,9 @@ class WiimoteNode(threading.Thread):
                     self.pub.publish(Command(speed_x, speed_y))
                 rospy.sleep(self.sleepDuration)
 
-        def shutdown(self):
-            if self.wm is not None:
-                self.wm.close()
+    def shutdown(self):
+        if self.wm is not None:
+            self.wm.close()
 
 
 if __name__ == '__main__':
