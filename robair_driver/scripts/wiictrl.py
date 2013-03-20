@@ -15,7 +15,7 @@ class WiimoteNode(threading.Thread):
     def __init__(self, topic='/cmd', node_name="wiimote", freq=4):
         threading.Thread.__init__(self)
         self.freq = freq
-        self.button_ctrl = True
+        self.button_ctrl = 0
         self.sleepDuration = 1.0 / freq
         self.node_name = node_name
         self.pub = rospy.Publisher(topic, Command)
@@ -51,8 +51,8 @@ class WiimoteNode(threading.Thread):
                     self.button_ctrl = 0
                 if self.wm.state['buttons'] & cwiid.BTN_1:
                     self.button_ctrl = 1
-                if self.wm.state['buttons'] & cwiid.BTN_2:
-                    self.button_ctrl = 2
+                #if self.wm.state['buttons'] & cwiid.BTN_2:
+                #    self.button_ctrl = 2
                    
                 m_speed_x = speed_x
                 m_speed_y = speed_y
