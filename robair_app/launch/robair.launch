@@ -7,9 +7,10 @@
   <param name="webcam_device" value="/dev/video1" />
 
 
-  <node pkg="robair_app" type="http_streamer.py" name="http_streamer" required="true" output="screen" />
+  <node pkg="robair_driver" type="webcam.py" name="webcam" required="true" output="screen" />
   <node pkg="robair_driver" type="battery.py" name="battery" required="true" output="screen" />
   <node pkg="robair_driver" type="network.py" name="network" required="true" output="screen" />
+  <node pkg="robair_app" type="http_streamer.py" name="http_streamer" required="true" output="screen" />
   <node pkg="robair_app" type="robot_manager.py" name="robot_manager" required="true" output="screen"/>
 
   <!-- Start rviz and load config -->

@@ -27,10 +27,11 @@ class WebcamNode():
         self.gstreamer_worker.join()
 
     def _gstreamer_task(self):
-        command = ('gst-launch v4l2src device=/dev/video0 ! '
+        device = rospy.get_param('webcam_device', '/dev/video0')
+        command = ('gst-launch v4l2src device=%s ! '
                    '\'video/x-raw-yuv,width=640,height=480\' ! '
                    'x264enc pass=qual quantizer=20 tune=zerolatency ! avimux !'
-                   ' tcpserversink  port=9999')
+                   ' tcpserversink  port=9999' % device)
         subprocess.call(command, shell=True)
 
 
