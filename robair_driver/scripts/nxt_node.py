@@ -8,7 +8,6 @@ roslib.load_manifest('robair_driver')
 
 import rospy
 
-from std_msgs.msg import String
 from robair_msgs.msg import Command
 
 
@@ -18,12 +17,10 @@ class NxtNode(object):
         self.node_name = node_name
         rospy.init_node(self.node_name)
         rospy.Subscriber('/cmd', Command, self.new_cmd_callback)
-        self.pub_ultrasonic = rospy.Publisher('/info/distance', String)
         self.current_cmd = Command(0, 0)
         self.brick = nxt.find_one_brick()
         self.motor_a = nxt.Motor(self.brick, nxt.PORT_A)
         self.motor_b = nxt.Motor(self.brick, nxt.PORT_B)
-        self.ultrasonic = nxt.Ultrasonic(self.brick, nxt.PORT_4)
 
     def new_cmd_callback(self, cmd):
         if cmd.speed is None:
@@ -60,7 +57,6 @@ class NxtNode(object):
 
     def main_loop(self):
         while not rospy.is_shutdown():
-            self.pub_ultrasonic.publish("%s" % self.ultrasonic.get_sample())
             self.move()
             time.sleep(0.1)
 
