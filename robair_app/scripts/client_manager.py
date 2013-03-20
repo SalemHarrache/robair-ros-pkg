@@ -15,7 +15,7 @@ if __name__ == '__main__':
     xmpp = ClientManager(node_name)
 
     rospy.loginfo("%s running..." % node_name)
-    rospy.loginfo("%s stopping..." % node_name)
     rospy.spin()
+    rospy.loginfo("%s stopping..." % node_name)
     xmpp.disconnect()
     rospy.loginfo("%s stopped." % node_name)

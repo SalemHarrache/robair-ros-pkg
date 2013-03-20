@@ -11,6 +11,5 @@
   <node pkg="robair_driver" type="webcam.py" name="webcam" required="true" output="screen" />
   <node pkg="robair_app" type="http_streamer.py" name="http_streamer" required="true" output="screen" />
   <node pkg="robair_app" type="client_manager.py" name="client_manager" required="true" output="screen"/>
-  <node pkg="robair_driver" type="wiictrl.py" name="wiictrl" required="true" output="screen" />
 
 </launch>
