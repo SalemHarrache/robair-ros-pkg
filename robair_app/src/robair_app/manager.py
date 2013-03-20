@@ -27,6 +27,8 @@ class RobotManager(ClientXMPP):
         if r.json()['valid']:
             jid = self.current_rpc_session().client_jid
             self.clients[jid] = self.get_proxy(jid)
+            run_player(self.get_url_streaming(),
+                       self.clients[jid].get_url_streaming())
         return authorize
 
     def forward_distance(self, distance):
