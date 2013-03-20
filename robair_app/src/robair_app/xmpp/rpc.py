@@ -53,7 +53,7 @@ class RemoteXMPPProxy(object):
         else:
             return True
 
-    def __rpc_wait_response(self, excepted_request_id, timeout=10):
+    def __rpc_wait_response(self, excepted_request_id, timeout=0.3):
         remaining_timeout = timeout
         timeout_step = 0.1
         while True:
@@ -70,7 +70,8 @@ class RemoteXMPPProxy(object):
                 break
             remaining_timeout = remaining_timeout - timeout_step
             if remaining_timeout <= 0:
-                raise RemoteXMPPTimeout()
+                pass
+                # raise RemoteXMPPTimeout()
 
     def __rpc_send(self, name, *args, **kwargs):
         log.info('run remote_method %s(%s, %s)' % (name, args, kwargs))

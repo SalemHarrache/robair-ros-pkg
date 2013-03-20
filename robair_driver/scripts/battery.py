@@ -11,11 +11,11 @@ from std_msgs.msg import String
 
 class BatteryNode():
     '''Robair battery node'''
-    def __init__(self, topic='/info/battery_level', pubrate=10):
+    def __init__(self, topic='/info/battery_level', pubrate=1):
         self.pub = rospy.Publisher(topic, String)
         rospy.init_node('battery')
         # fake battery states generator
-        self.state_gen = ('%.2f' % (100 - (i / 1000)) for i in xrange(1, 1000))
+        self.state_gen = ('%.2f' % (100 - (i / 100)) for i in xrange(1, 100))
         self.time_sleep = 1 / pubrate if pubrate != 0 else 1
 
     @property

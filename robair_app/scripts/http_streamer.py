@@ -16,7 +16,7 @@ if __name__ == '__main__':
     server = HTTPStreamer()
     server.start()
     print server.url
-    # server.display(server.url)
+    server.display(server.url)
 
     rospy.loginfo("%s running..." % node_name)
     rospy.spin()
