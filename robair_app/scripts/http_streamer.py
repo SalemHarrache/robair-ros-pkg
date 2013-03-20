@@ -1,25 +1,61 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import os
-import roslib
-import rospy
-
-roslib.load_manifest('robair_app')
-
-from robair_app.http_streamer import HTTPStreamer
+import socket
+from select import select
+import subprocess
+import multiprocessing
+from flask import Flask, Response
 
 
-if __name__ == '__main__':
-    node_name = os.path.basename(__file__).strip('.py')
+app = Flask(__name__)
+app.secret_key = 'blablabla'
 
-    rospy.init_node(node_name)
-    server = HTTPStreamer()
-    server.start()
-    print server.url
-    server.display("http://192.168.43.63:9090/")
 
-    rospy.loginfo("%s running..." % node_name)
-    rospy.spin()
-    rospy.loginfo("%s stopping..." % node_name)
-    server.stop()
-    rospy.loginfo("%s stopped." % node_name)
+@app.route('/', methods=["GET"])
+def video():
+    return Response(video_stream_tcp(), mimetype='video/mp4')
+
+
+def run_gstreamer():
+    def gstreamer_task():
+        command = ('gst-launch v4l2src device=/dev/video0 ! '
+                   '\'video/x-raw-yuv,width=640,height=480\' ! '
+                   'x264enc pass=qual quantizer=20 tune=zerolatency ! avimux !'
+                   ' tcpserversink  port=9999')
+
+        subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=-1,
+                         shell=True)
+    gstreamer_worker = multiprocessing.Process(target=gstreamer_task)
+    gstreamer_worker.start()
+    return gstreamer_worker
+
+
+def video_stream_tcp():
+    buffer_size = 10000
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('', 9999))
+    while True:
+        readable = select([s], [], [])
+        yield readable[0][0].recv(buffer_size)
+
+
+def run():
+    gstreamer_worker = run_gstreamer()
+    app.debug = False
+    app.run(port=9090, threaded=True)
+    gstreamer_worker.terminate()
+    gstreamer_worker.join()
+
+
+server = multiprocessing.Process(target=run)
+
+
+if __name__ == "__main__":
+    try:
+        print 'Httpd serve forever'
+        server.start()
+    except KeyboardInterrupt:
+        # server.terminate()
+        server.join()
+        print "Shutdown camera server ..."
