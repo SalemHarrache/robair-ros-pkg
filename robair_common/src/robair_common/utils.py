@@ -8,7 +8,7 @@ def get_local_ip_address():
     ipaddr = ''
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("google.fr", 80))
+        s.connect(("google.fr", 8080))
         ipaddr = s.getsockname()[0]
         s.close()
     except:

@@ -1,5 +1,4 @@
 import rospy
-import requests
 import uuid
 
 from robair_msgs.msg import Command
@@ -18,15 +17,13 @@ class RobotManager(ClientXMPP):
         password = rospy.get_param('robot_jabber_password')
         super(RobotManager, self).__init__(jid, password)
         self.cmd_publisher = rospy.Publisher('/cmd', Command)
-        self.clients = {}
+        self.clients = []
 
     @remote
     def hello(self, key):
         # TODO: use ressource manager website !
         jid = self.current_rpc_session().client_jid
-        self.clients[jid] = self.get_proxy(jid)
-        run_player(self.get_url_streaming(),
-                   self.clients[jid].get_url_streaming())
+        self.clients.append(jid)
         return True
         # url = rospy.get_param('robair_api_url')
         # r = requests.get(url + "check", params={"key": key})
@@ -38,14 +35,12 @@ class RobotManager(ClientXMPP):
         #                self.clients[jid].get_url_streaming())
         # return authorize
 
-    def forward_distance(self, distance):
-        for client in self.clients.values():
-            client.publish_distance(distance)
-
     @remote
-    def get_url_streaming(self):
+    def run_video_player(self, remote_url):
         # Improve this with ROS srv...
-        return "http://%s:%d" % (get_local_ip_address(), 9090)
+        local_url = "http://%s:%d" % (get_local_ip_address(), 9090)
+        run_player(local_url, remote_url)
+        return local_url
 
     @remote
     def publish_cmd(self, cmd):
@@ -65,8 +60,6 @@ class ClientManager(ClientXMPP):
         self.proxy_robot = self.get_proxy(self.robot_jid)
         if not self.proxy_robot.hello(self.make_reservation()):
             raise RuntimeError('RobAir permission denied, try later...')
-        run_player(self.get_url_streaming(),
-                   self.proxy_robot.get_url_streaming())
         # subscriber to a remote cmd
         rospy.Subscriber('/cmd', Command, self.proxy_robot.publish_cmd)
 
@@ -81,7 +74,9 @@ class ClientManager(ClientXMPP):
         #     return data['key']
         return uuid.uuid4()
 
-    @remote
-    def get_url_streaming(self):
+    def run_video_player(self):
+        self.remote_url
         # Improve this with ROS srv...
-        return "http://%s:%d" % (get_local_ip_address(), 9090)
+        local_url = "http://%s:%d" % (get_local_ip_address(), 9090)
+        remote_url = self.proxy_robot.run_video_player(local_url)
+        run_player(local_url, remote_url)
