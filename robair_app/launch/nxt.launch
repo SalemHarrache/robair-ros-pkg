@@ -11,9 +11,10 @@
   <node pkg="robair_driver" type="battery.py" name="battery" required="true" output="screen" />
   <node pkg="robair_driver" type="network.py" name="network" required="true" output="screen" />
   <node pkg="robair_driver" type="keyboard.py" name="keyboard" required="true" output="screen" />
-  <!-- <node pkg="robair_driver" type="nxt_node.py" name="nxt_node" required="true" output="screen" /> -->
+  <node pkg="robair_driver" type="nxt_node.py" name="nxt_node" required="true" output="screen" />
   <node pkg="robair_app" type="robot_manager.py" name="robot_manager" required="true" output="screen"/>
-  <node pkg="robair_app" type="http_streamer.py" name="http_streamer" required="true" output="screen" />
+  <!-- <node pkg="robair_app" type="http_streamer.py" name="http_streamer" required="true" output="screen" /> -->
+  <node pkg="robair_driver" type="wiictrl.py" name="wiictrl" required="true" output="screen" />
 
   <!-- Start rviz and load config -->
   <!--<node pkg="rqt_graph" type="rqt_graph" output="screen" name="rqt_graph" />-->
