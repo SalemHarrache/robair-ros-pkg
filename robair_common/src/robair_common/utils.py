@@ -1,6 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import time
+import socket
+
+
+def get_local_ip_address():
+    ipaddr = ''
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("google.fr", 80))
+        ipaddr = s.getsockname()[0]
+        s.close()
+    except:
+        pass
+    return ipaddr
 
 
 class retry(object):
