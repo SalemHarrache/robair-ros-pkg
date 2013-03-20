@@ -1,74 +1,68 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import socket
-import multiprocessing
 from PySide import QtGui
 from PySide.phonon import Phonon
 
+from PySide.QtGui import *
+from PySide.QtCore import *
+import os,sys
 
-def get_widget_player(file_path, audio):
+def main(args):
+    a = QApplication([])
+    a.setApplicationName('Visio Video Player')
+    fenetre = QWidget()
+
+    bouton2 = QPushButton("textComment")
+    bouton3 = QPushButton("notrewebcam")
+
+    monLayout = QGridLayout()
+    monLayout.columnMinimumWidth ( 11 )
+    #####################"VIDEO1####################################"
+    file_path = 'http://127.0.0.1:9090/'
+    media_src_rem = Phonon.MediaSource(file_path)
+    media_obj_rem = Phonon.MediaObject()
+    media_obj_rem.setCurrentSource(media_src_rem)
+
+    remote_video_widget = Phonon.VideoWidget()
+    # permet d'auto adapter le ratio quand on redimentionne
+    #remote_video_widget.setAspectRatio(Phonon.VideoWidget.AspectRatioWidget)
+    Phonon.createPath(media_obj_rem, remote_video_widget)
+
+    audio_out = Phonon.AudioOutput(Phonon.VideoCategory)
+    Phonon.createPath(media_obj_rem, audio_out)
+
+
+    #####################"VIDEO2####################################"
     media_src = Phonon.MediaSource(file_path)
-    media_obj = Phonon.MediaObject()
-    media_obj.setCurrentSource(media_src)
+    media_obj_loc = Phonon.MediaObject()
+    media_obj_loc.setCurrentSource(media_src)
+
     video_widget = Phonon.VideoWidget()
-    Phonon.createPath(media_obj, video_widget)
-    if audio:
-        audio_out = Phonon.AudioOutput(Phonon.VideoCategory)
-        Phonon.createPath(media_obj, audio_out)
-    return media_obj, video_widget
+    Phonon.createPath(media_obj_loc, video_widget)
+    video_widget.setMaximumSize(200,150)
+    # audio_out = Phonon.AudioOutput(Phonon.VideoCategory)
+    # Phonon.createPath(media_obj_loc, audio_out)
+
+    #########################################################"
+
+    monLayout.addWidget(remote_video_widget,0,0,10,10)
+
+    #monLayout.addWidget(bouton2,0,4,1,1)
+    monLayout.addWidget(video_widget,9,9,1,1)
 
 
-class VideoStreamPlayer(object):
-    def __init__(self, local_url, remote_url):
-        self.app = QtGui.QApplication([])
-        self.app.setApplicationName('Visio Video Player')
-        self.frame = QtGui.QWidget()
-        self.layout = QtGui.QGridLayout()
-        self.local_media, self.local_widget = get_widget_player(local_url,
-                                                                False)
-        self.remote_media, self.remote_widget = get_widget_player(remote_url,
-                                                                  True)
-        self.local_widget.setMaximumSize(200, 150)
-        self.layout.addWidget(self.remote_widget, 0, 0, 10, 10)
-        self.layout.addWidget(self.local_widget, 9, 9, 1, 1)
-
-    def show(self):
-        self.frame.setLayout(self.layout)
-        self.frame.show()
-        self.local_media.play()
-        self.remote_media.play()
-        self.app.exec_()
 
 
-def get_local_ip_address():
-    ipaddr = ''
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("google.fr", 80))
-        ipaddr = s.getsockname()[0]
-        s.close()
-    except:
-        pass
-    return ipaddr
+    fenetre.setLayout(monLayout)
+    fenetre.show()
+
+    media_obj_rem.play() #   VIDEO1
+    media_obj_loc.play() #   VIDEO2
+    r=a.exec_()
+    return r
+if __name__=="__main__":
+    main(sys.argv)
 
 
-class HTTPVideoPlayer(object):
-    def __init__(self):
-        self.port = 9090
-        self.local_address = "127.0.0.1"  # get_local_ip_address()
 
-    @property
-    def url(self):
-        # this is the small hack for using local network ip address
-        return "http://%s:%s/" % (self.local_address, self.port)
-
-    def display(self, remote_host):
-        player = VideoStreamPlayer(self.url, remote_host)
-        process = multiprocessing.Process(target=player.show)
-        process.start()
-        process.join()
-
-
-if __name__ == "__main__":
-    player = HTTPVideoPlayer()
-    player.display('http://127.0.0.1:9090')
