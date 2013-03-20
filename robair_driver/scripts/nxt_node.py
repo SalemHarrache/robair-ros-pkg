@@ -18,7 +18,7 @@ class NxtNode(object):
         self.node_name = node_name
         rospy.init_node(self.node_name)
         rospy.Subscriber('/cmd', Command, self.new_cmd_callback)
-        self.pub_ultrasonic = rospy.Publisher('/info/ultrasonic', String)
+        self.pub_ultrasonic = rospy.Publisher('/info/distance', String)
         self.current_cmd = Command(0, 0)
         self.brick = nxt.find_one_brick()
         self.motor_a = nxt.Motor(self.brick, nxt.PORT_A)
