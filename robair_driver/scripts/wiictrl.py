@@ -55,43 +55,56 @@ class WiimoteNode(threading.Thread):
 
             if self.buttonCtrl:
                 if wm.state['buttons'] & cwiid.BTN_UP:
-                    if speedX != 1:
-                       speedX += 1
+                    #if speedX != 1:
+                    speedX = 1
                 if wm.state['buttons'] & cwiid.BTN_DOWN:
-                    if speedX != -1:
-                        speedX -= 1
+                    #if speedX != -1:
+                    speedX = -1
                 if wm.state['buttons'] & cwiid.BTN_LEFT:
-                    if speedY != -90:
-                        speedY-= 90
+                    #if speedY != -90:
+                        speedY = -90
                 if wm.state['buttons'] & cwiid.BTN_RIGHT:
-                    if speedY != 90:
-                        speedY += 90
+                    #if speedY != 90:
+                        speedY = 90
             else:
-                wiiX=abs(wm.state['acc'][0] - 125)
-                if is_in(wiiX,0,6):
-                    speedX=0
-                elif is_in(wiiX,6,12):
+                if wm.state['acc'][0] < 120:
+                    speedX=-1
+                if wm.state['acc'][0] > 130:
                     speedX=1
-                elif is_in(wiiX,12,18):
-                    speedX=1#2
-                elif wiiX > 18:
-                    speedX=1#3
-                if wm.state['acc'][0]<120:
-                    speedX=-speedX
-
-                wiiY=abs(wm.state['acc'][1] - 125)
-                if is_in(wiiY,0,6):
-                    speedY=0
-                elif is_in(wiiY,6,12):
-                    speedY=30
-                elif is_in(wiiY,12,18):
-                    speedY=60
-                elif wiiY > 18:
-                    speedY=90
                 if wm.state['acc'][1] < 120:
-                    speedY=-speedY
+                    speedY=-90
+                if wm.state['acc'][1] > 130:
+                    speedY=90
+             
+#                wiiX=abs(wm.state['acc'][0] - 125)
+#                #if is_in(wiiX,0,6):
+#                    #speedX=0
+#                if is_in(wiiX,6,12):
+#                    speedX=1
+#                elif is_in(wiiX,12,18):
+#                    speedX=1#2
+#                elif wiiX > 18:
+#                    speedX=1#3
+#                if wm.state['acc'][0]<120:
+#                    speedX=-speedX
+#
+#                wiiY=abs(wm.state['acc'][1] - 125)
+#                #if is_in(wiiY,0,6):
+#                    #speedY=0
+#                if is_in(wiiY,6,12):
+#                    speedY=30
+#                elif is_in(wiiY,12,18):
+#                    speedY=60
+#                elif wiiY > 18:
+#                    speedY=90
+#                if wm.state['acc'][1] > 130:
+#                    speedY=-speedY
 
-            if speedX != m_speedX or speedY != m_speedY :
+            if speedX == m_speedX:
+                speedX = 0
+            if speedY == m_speedY:
+                speedY = 0
+            if speedX != 0 or speedY != 0 :
                 self.pub.publish(Command(speedX, speedY))
             rospy.sleep(self.sleepDuration)
 
