@@ -37,3 +37,7 @@ class VideoStreamPlayer(object):
         self.local_media.play()
         self.remote_media.play()
         self.app.exec_()
+
+if __name__ == "__main__":
+    pom = VideoStreamPlayer('http://127.0.0.1:9090', 'http://127.0.0.1:9090')
+    pom.show()
