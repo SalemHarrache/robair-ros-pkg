@@ -1,5 +1,5 @@
 <launch>
-
+  <param name="logger_level" value="DEBUG"/>
   <param name="tv_jabber_id" value="robair2013.tv@gmail.com"/>
   <param name="tv_jabber_password" value="Q1}aaM$3e"/>
   <param name="robot_jabber_id" value="robair2013.robot@gmail.com"/>
