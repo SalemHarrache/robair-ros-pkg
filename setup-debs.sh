@@ -87,10 +87,10 @@ displayandexec "Install sleekxmpp" pip install -U sleekxmpp
 displayandexec "Install dnspython" pip install -U dnspython
 displayandexec "Install nxt-python" pip install -U nxt-python
 displayandexec "Install pyusb" pip install -U pyusb
+displayandexec "Install requests" pip install -U requests
 
-displaytitle "Redis"
-displayandexec "Install redis-server" sudo apt-get install redis-server
-displayandexec "Install redis-client" pip install -U redis
+displaytitle "Wiimote"
+displayandexec "Wiimote drivers" apt-get install python-cwiid wminput lswm
 
 displaytitle "GStreamer installation"
 displayandexec "Install gstreamer-tools" apt-get -y install gstreamer-tools
