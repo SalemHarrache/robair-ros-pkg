@@ -28,7 +28,11 @@ class WiimoteNode(threading.Thread):
 	done = lambda: rospy.is_shutdown()
 
         print 'Put Wiimote in discoverable mode now (press 1+2)...'
-        wm = cwiid.Wiimote()
+        try:
+            wm = cwiid.Wiimote()
+        except:
+            exit(0)
+
 	print 'Wii Remote connected...'
 	print '\nPress the HOME button to disconnect the Wiimote and stop the node'
         time.sleep(1)
@@ -62,19 +66,19 @@ class WiimoteNode(threading.Thread):
                     speedX = -1
                 if wm.state['buttons'] & cwiid.BTN_LEFT:
                     #if speedY != -90:
-                        speedY = -90
+                    speedY = -90
                 if wm.state['buttons'] & cwiid.BTN_RIGHT:
                     #if speedY != 90:
-                        speedY = 90
+                    speedY = 90
             else:
-                if wm.state['acc'][0] < 120:
+                if wm.state['acc'][2] < 120:
                     speedX=-1
-                if wm.state['acc'][0] > 130:
+                if wm.state['acc'][2] > 130:
                     speedX=1
                 if wm.state['acc'][1] < 120:
-                    speedY=-90
-                if wm.state['acc'][1] > 130:
                     speedY=90
+                if wm.state['acc'][1] > 130:
+                    speedY=-90
              
 #                wiiX=abs(wm.state['acc'][0] - 125)
 #                #if is_in(wiiX,0,6):
