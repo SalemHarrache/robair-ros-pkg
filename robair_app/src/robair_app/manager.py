@@ -61,6 +61,7 @@ class ClientManager(ClientXMPP):
         # if not self.proxy_robot.hello(self.make_reservation()):
         #     raise RuntimeError('RobAir permission denied, try later...')
         # subscriber to a remote cmd
+        self.run_video_player()
         rospy.Subscriber('/cmd', Command, self.proxy_robot.publish_cmd)
 
     def make_reservation(self):
@@ -75,7 +76,6 @@ class ClientManager(ClientXMPP):
         return uuid.uuid4()
 
     def run_video_player(self):
-        self.remote_url
         # Improve this with ROS srv...
         local_url = "http://%s:%d" % (get_local_ip_address(), 9090)
         remote_url = self.proxy_robot.run_video_player(local_url)
