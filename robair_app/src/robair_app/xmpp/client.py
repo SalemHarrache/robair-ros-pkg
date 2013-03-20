@@ -26,7 +26,7 @@ class ClientXMPP(sleekxmpp.ClientXMPP):
 
         self.response_queue = Queue()
         self.connect()
-        self.process(Block=False)
+        self.process(Block=True)
 
     def get_proxy(self, jid):
         return RemoteXMPPProxy(self, jid)

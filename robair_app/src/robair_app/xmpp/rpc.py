@@ -36,9 +36,9 @@ class RemoteXMPPProxy(object):
     def __init__(self, client, remote_jid):
         self.client = client
         self.remote_jid = remote_jid
-        # if not self.__rpc_ping():
-        #     raise RemoteXMPPException("remote XMPP agent (%s) is unavailable"
-        #                               % remote_jid)
+        if not self.__rpc_ping():
+            raise RemoteXMPPException("remote XMPP agent (%s) is unavailable"
+                                      % remote_jid)
         self.queue = self.client.response_queue
 
     @retry(tries=3, delay=1)
