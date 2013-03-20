@@ -1,8 +1,10 @@
 <launch>
-  <param name="logger_level" value="DEBUG"/>
-  <param name="tv_jabber_id" value="robair2013.tv@gmail.com"/>
-  <param name="tv_jabber_password" value="Q1}aaM$3e"/>
-  <param name="robot_jabber_id" value="robair2013.robot@gmail.com"/>
+  <arg name="robot_jid" default="robair@im.quicker.fr" />
+  <arg name="jid" default="tv@im.quicker.fr" />
+  <arg name="password" default="tv" />
+  <param name="tv_jabber_id" value="$(arg jid)"/>
+  <param name="tv_jabber_password" value="$(arg password)"/>
+  <param name="robot_jabber_id" value="$(arg robot_jid)"/>
   <param name="robair_api_url" value="http://robair.quicker.fr/api/" />
   <param name="webcam_device" value="/dev/video0" />
 
