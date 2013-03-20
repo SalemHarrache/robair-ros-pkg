@@ -55,31 +55,31 @@ class WiimoteNode(threading.Thread):
 
             if self.buttonCtrl:
                 if wm.state['buttons'] & cwiid.BTN_UP:
-                    if speedX != 3:
+                    if speedX != 1:
                        speedX += 1
                 if wm.state['buttons'] & cwiid.BTN_DOWN:
-                    if speedX != -3:
+                    if speedX != -1:
                         speedX -= 1
                 if wm.state['buttons'] & cwiid.BTN_LEFT:
                     if speedY != -90:
-                        speedY-= 30
+                        speedY-= 90
                 if wm.state['buttons'] & cwiid.BTN_RIGHT:
                     if speedY != 90:
-                        speedY += 30
+                        speedY += 90
             else:
-                wiiX=abs(wm.state['acc'][1] - 126)
+                wiiX=abs(wm.state['acc'][0] - 125)
                 if is_in(wiiX,0,6):
                     speedX=0
                 elif is_in(wiiX,6,12):
                     speedX=1
                 elif is_in(wiiX,12,18):
-                    speedX=2
+                    speedX=1#2
                 elif wiiX > 18:
-                    speedX=3
-                if wm.state['acc'][1]>120:
+                    speedX=1#3
+                if wm.state['acc'][0]<120:
                     speedX=-speedX
 
-                wiiY=abs(wm.state['acc'][0] - 125)
+                wiiY=abs(wm.state['acc'][1] - 125)
                 if is_in(wiiY,0,6):
                     speedY=0
                 elif is_in(wiiY,6,12):
@@ -88,44 +88,19 @@ class WiimoteNode(threading.Thread):
                     speedY=60
                 elif wiiY > 18:
                     speedY=90
-                if wm.state['acc'][0]<120:
+                if wm.state['acc'][1] < 120:
                     speedY=-speedY
 
             if speedX != m_speedX or speedY != m_speedY :
                 self.pub.publish(Command(speedX, speedY))
             rospy.sleep(self.sleepDuration)
 
+
         wm.close()
     
 
 if __name__ == '__main__':
-    wiimote_node = WiimoteNode()
-    try:
-        wiimoteNode.main_loop()
+    wiimoteNode = WiimoteNode()
+    wiimoteNode.main_loop()
 
-    except rospy.ROSInterruptException:
-        rospy.loginfo("ROS Shutdown Request.")
-    except KeyboardInterrupt, e:
-        rospy.loginfo("Received keyboard interrupt.")
-    except WiimoteNotFoundError, e:
-        rospy.logfatal(str(e))
-    except WiimoteEnableError, e:
-        rospy.logfatal(str(e))
-    except CallbackStackMultInstError, e:
-        rospy.logfatal(str(e))
-    except CallbackStackEmptyError, e:
-        rospy.logfatal(str(e))
-    except ResumeNonPausedError, e:
-        rospy.logfatal(str(e))
-    except CallbackStackEmptyError, e:
-        rospy.logfatal(str(e))
-
-    except:
-        excType, excValue, excTraceback = sys.exc_info()[:3]
-        traceback.print_exception(excType, excValue, excTraceback)
-    finally:
-        if (wiimoteNode is not None):
-            wiimoteNode.shutdown()
-        rospy.loginfo("Exiting Wiimote node.")
-        sys.exit(0)
 
