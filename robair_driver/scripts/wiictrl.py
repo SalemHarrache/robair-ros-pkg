@@ -2,7 +2,6 @@
 import roslib
 import cwiid
 import threading
-import time
 import rospy
 
 roslib.load_manifest('robair_driver')
@@ -16,7 +15,7 @@ class WiimoteNode(threading.Thread):
     def __init__(self, topic='/cmd', node_name="wiimote", freq=4):
         threading.Thread.__init__(self)
         self.freq = freq
-        self.buttonCtrl = True
+        self.button_ctrl = True
         self.sleepDuration = 1.0 / freq
         self.node_name = node_name
         self.pub = rospy.Publisher(topic, Command)
@@ -28,96 +27,73 @@ class WiimoteNode(threading.Thread):
                 return cwiid.Wiimote()
             except:
                 pass
-                time.sleep(1)
+            rospy.sleep(1)
 
     def main_loop(self):
         print 'Put Wiimote in discoverable mode now (press 1+2)...'
-        wm = self.get_wiimote()
-        if wm is not None:
+        self.wm = self.get_wiimote()
+        if self.wm is not None:
             print 'Wii Remote connected...'
-            print '\nPress the HOME button to disconnect the Wiimote and stop the node'
-            time.sleep(1)
+            print '\nPress the HOME button to disconnect the Wiimote'
+            rospy.sleep(1)
 
-            Rumble = False
-            wm.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
-            speedX = 0
-            speedY = 0
-            is_in = lambda x, y, z: x > y and x <= z
+            self.wm.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
+            speed_x = 0
+            speed_y = 0
 
             while not rospy.is_shutdown():
 
-                if wm.state['buttons'] & cwiid.BTN_HOME:
+                if self.wm.state['buttons'] & cwiid.BTN_HOME:
                     print 'closing Bluetooth connection. Good Bye!'
-                    time.sleep(1)
-                    exit(wm)
+                    return
 
-                if wm.state['buttons'] & cwiid.BTN_A:
-                    self.buttonCtrl=True
-                if wm.state['buttons'] & cwiid.BTN_B:
-                    self.buttonCtrl=False
-                m_speedX=speedX
-                m_speedY=speedY
+                if self.wm.state['buttons'] & cwiid.BTN_A:
+                    self.button_ctrl = True
+                if self.wm.state['buttons'] & cwiid.BTN_B:
+                    self.button_ctrl = False
+                m_speed_x = speed_x
+                m_speed_y = speed_y
 
-                if self.buttonCtrl:
-                    if wm.state['buttons'] & cwiid.BTN_UP:
-                        #if speedX != 1:
-                        speedX = 1
-                    if wm.state['buttons'] & cwiid.BTN_DOWN:
-                        #if speedX != -1:
-                        speedX = -1
-                    if wm.state['buttons'] & cwiid.BTN_LEFT:
-                        #if speedY != -90:
-                        speedY = -90
-                    if wm.state['buttons'] & cwiid.BTN_RIGHT:
-                        #if speedY != 90:
-                        speedY = 90
+                if self.button_ctrl:
+                    if self.wm.state['buttons'] & cwiid.BTN_UP:
+                        #if speed_x != 1:
+                        speed_x = 1
+                    if self.wm.state['buttons'] & cwiid.BTN_DOWN:
+                        #if speed_x != -1:
+                        speed_x = -1
+                    if self.wm.state['buttons'] & cwiid.BTN_LEFT:
+                        #if speed_y != -90:
+                        speed_y = -90
+                    if self.wm.state['buttons'] & cwiid.BTN_RIGHT:
+                        #if speed_y != 90:
+                        speed_y = 90
                 else:
-                    if wm.state['acc'][2] < 120:
-                        speedX=-1
-                    if wm.state['acc'][2] > 130:
-                        speedX=1
-                    if wm.state['acc'][1] < 120:
-                        speedY=90
-                    if wm.state['acc'][1] > 130:
-                        speedY=-90
+                    if self.wm.state['acc'][2] < 120:
+                        speed_x = -1
+                    if self.wm.state['acc'][2] > 130:
+                        speed_x = 1
+                    if self.wm.state['acc'][1] < 120:
+                        speed_y = 90
+                    if self.wm.state['acc'][1] > 130:
+                        speed_y = -90
 
-    #                wiiX=abs(wm.state['acc'][0] - 125)
-    #                #if is_in(wiiX,0,6):
-    #                    #speedX=0
-    #                if is_in(wiiX,6,12):
-    #                    speedX=1
-    #                elif is_in(wiiX,12,18):
-    #                    speedX=1#2
-    #                elif wiiX > 18:
-    #                    speedX=1#3
-    #                if wm.state['acc'][0]<120:
-    #                    speedX=-speedX
-    #
-    #                wiiY=abs(wm.state['acc'][1] - 125)
-    #                #if is_in(wiiY,0,6):
-    #                    #speedY=0
-    #                if is_in(wiiY,6,12):
-    #                    speedY=30
-    #                elif is_in(wiiY,12,18):
-    #                    speedY=60
-    #                elif wiiY > 18:
-    #                    speedY=90
-    #                if wm.state['acc'][1] > 130:
-    #                    speedY=-speedY
-
-                if speedX == m_speedX:
-                    speedX = 0
-                if speedY == m_speedY:
-                    speedY = 0
-                if speedX != 0 or speedY != 0 :
-                    self.pub.publish(Command(speedX, speedY))
+                if speed_x == m_speed_x:
+                    speed_x = 0
+                if speed_y == m_speed_y:
+                    speed_y = 0
+                if speed_x != 0 or speed_y != 0:
+                    self.pub.publish(Command(speed_x, speed_y))
                 rospy.sleep(self.sleepDuration)
 
-            wm.close()
+        def shutdown(self):
+            if self.wm is not None:
+                self.wm.close()
 
 
 if __name__ == '__main__':
-    wiimoteNode = WiimoteNode()
-    wiimoteNode.main_loop()
-
-
+    wiimote_node = WiimoteNode()
+    rospy.loginfo("%s running..." % wiimote_node.node_name)
+    wiimote_node.main_loop()
+    rospy.spin()
+    wiimote_node.shutdown()
+    rospy.loginfo("%s stopped." % wiimote_node.node_name)
