@@ -1,16 +1,15 @@
 <launch>
 
-  <arg name="jid" default="robair@im.quicker.fr"/>
-  <arg name="password" default="robair" />
-  <param name="robot_jabber_id" value="$(arg jid)"/>
   <param name="logger_level" value="DEBUG"/>
-  <param name="robot_jabber_password" value="$(arg password)"/>
+  <param name="robot_jabber_id" value="robair2013.robot@gmail.com"/>
+  <param name="robot_jabber_password" value="wS`h%w1{"/>
   <param name="robair_api_url" value="http://robair.quicker.fr/api/" />
+  <param name="webcam_device" value="/dev/video1" />
 
+
+  <node pkg="robair_app" type="http_streamer.py" name="http_streamer" required="true" output="screen" />
   <node pkg="robair_driver" type="battery.py" name="battery" required="true" output="screen" />
   <node pkg="robair_driver" type="network.py" name="network" required="true" output="screen" />
-  <node pkg="robair_driver" type="keyboard.py" name="keyboard" required="true" output="screen" />
-  <node pkg="robair_driver" type="webcam.py" name="webcam" required="true" output="screen" />
   <node pkg="robair_app" type="robot_manager.py" name="robot_manager" required="true" output="screen"/>
 
   <!-- Start rviz and load config -->
