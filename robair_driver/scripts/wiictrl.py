@@ -48,13 +48,16 @@ class WiimoteNode(threading.Thread):
                     return
 
                 if self.wm.state['buttons'] & cwiid.BTN_A:
-                    self.button_ctrl = True
-                if self.wm.state['buttons'] & cwiid.BTN_B:
-                    self.button_ctrl = False
+                    self.button_ctrl = 0
+                if self.wm.state['buttons'] & cwiid.BTN_1:
+                    self.button_ctrl = 1
+                if self.wm.state['buttons'] & cwiid.BTN_2:
+                    self.button_ctrl = 2
+                   
                 m_speed_x = speed_x
                 m_speed_y = speed_y
 
-                if self.button_ctrl:
+                if self.button_ctrl == 0 :
                     if self.wm.state['buttons'] & cwiid.BTN_UP:
                         #if speed_x != 1:
                         speed_x = 1
@@ -68,10 +71,16 @@ class WiimoteNode(threading.Thread):
                         #if speed_y != 90:
                         speed_y = 90
                 else:
-                    if self.wm.state['acc'][2] < 120:
-                        speed_x = -1
-                    if self.wm.state['acc'][2] > 130:
-                        speed_x = 1
+                    if self.button_ctrl == 1 :
+                        if self.wm.state['acc'][2] < 116:
+                            speed_x = -1
+                        if self.wm.state['acc'][2] > 134:
+                            speed_x = 1
+                    elif self.button_ctrl == 2 :
+                        if self.wm.state['acc'][0] < 116:
+                            speed_x = -1
+                        if self.wm.state['acc'][0] > 134:
+                            speed_x = 1
                     if self.wm.state['acc'][1] < 120:
                         speed_y = 90
                     if self.wm.state['acc'][1] > 130:
