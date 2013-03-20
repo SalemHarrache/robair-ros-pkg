@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from PySide import QtGui
 from PySide.phonon import Phonon
+import multiprocessing
 
 
 def get_widget_player(file_path, audio):
@@ -38,6 +39,10 @@ class VideoStreamPlayer(object):
         self.remote_media.play()
         self.app.exec_()
 
-if __name__ == "__main__":
-    pom = VideoStreamPlayer('http://127.0.0.1:9090', 'http://127.0.0.1:9090')
-    pom.show()
+
+def run_player(local, remote):
+    def task():
+        p = VideoStreamPlayer(local, remote)
+        p.show()
+    player = multiprocessing.Process(target=task)
+    player.start()

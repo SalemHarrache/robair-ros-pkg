@@ -3,9 +3,11 @@ import requests
 from robair_msgs.msg import Command
 
 from robair_common import log
+from robair_common.utils import get_local_ip_address
 
 from .xmpp.client import ClientXMPP
 from .xmpp.rpc import remote
+from .player import run_player
 
 
 class RobotManager(ClientXMPP):
@@ -32,6 +34,11 @@ class RobotManager(ClientXMPP):
             client.publish_distance(distance)
 
     @remote
+    def get_url_streaming(self):
+        # Improve this with ROS srv...
+        return "http://%s:%d" % (get_local_ip_address(), 9090)
+
+    @remote
     def publish_cmd(self, cmd):
         jid = self.current_rpc_session().client_jid
         if jid in self.clients:
@@ -49,6 +56,8 @@ class ClientManager(ClientXMPP):
         self.proxy_robot = self.get_proxy(self.robot_jid)
         if not self.proxy_robot.hello(self.make_reservation()):
             raise RuntimeError('RobAir permission denied, try later...')
+        run_player(self.get_url_streaming(),
+                   self.proxy_robot.get_url_streaming())
         # subscriber to a remote cmd
         rospy.Subscriber('/cmd', Command, self.proxy_robot.publish_cmd)
 
@@ -60,3 +69,8 @@ class ClientManager(ClientXMPP):
             log.info("Error: %s" % data['error_message'])
         else:
             return data['key']
+
+    @remote
+    def get_url_streaming(self):
+        # Improve this with ROS srv...
+        return "http://%s:%d" % (get_local_ip_address(), 9090)
