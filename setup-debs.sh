@@ -90,7 +90,7 @@ displayandexec "Install pyusb" pip install -U pyusb
 displayandexec "Install requests" pip install -U requests
 
 displaytitle "Wiimote"
-displayandexec "Wiimote drivers" apt-get install python-cwiid wminput lswm
+displayandexec "Wiimote drivers" apt-get -y install python-cwiid wminput lswm
 
 displaytitle "GStreamer installation"
 displayandexec "Install gstreamer-tools" apt-get -y install gstreamer-tools
