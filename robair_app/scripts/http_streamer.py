@@ -25,12 +25,11 @@ def video():
 
 def run_gstreamer():
     def gstreamer_task():
-        device = rospy.get_param('webcam_device')
+        device = rospy.get_param('webcam_device', '/dev/video0')
         command = ('gst-launch v4l2src device=%s ! '
                    '\'video/x-raw-yuv,width=640,height=480\' ! '
                    'x264enc pass=qual quantizer=20 tune=zerolatency ! avimux !'
                    ' tcpserversink  port=9999' % device)
-        print
         subprocess.Popen(command, stdout=subprocess.PIPE, bufsize=-1,
                          shell=True)
     gstreamer_worker = multiprocessing.Process(target=gstreamer_task)
@@ -51,7 +50,7 @@ def run(node_name):
     rospy.init_node(node_name)
     gstreamer_worker = run_gstreamer()
     app.debug = False
-    app.run(port=9090, threaded=True)
+    app.run(port=9090, host="0.0.0.0", threaded=True)
     gstreamer_worker.terminate()
     gstreamer_worker.join()
 
