@@ -33,3 +33,4 @@ nosetests.xml
 *.py_
 doc
 *.swp
+*.idea
