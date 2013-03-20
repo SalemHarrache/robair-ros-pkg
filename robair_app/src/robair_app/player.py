@@ -29,12 +29,12 @@ class VideoStreamPlayer(object):
                                                                   True)
         self.local_widget.setMaximumSize(200, 150)
         self.layout.addWidget(self.remote_widget, 0, 0, 10, 10)
-        # self.layout.addWidget(self.local_widget, 9, 9, 1, 1)
+        self.layout.addWidget(self.local_widget, 9, 9, 1, 1)
 
     def show(self):
         self.frame.setLayout(self.layout)
         self.frame.show()
-        # self.local_media.play()
+        self.local_media.play()
         self.remote_media.play()
         self.app.exec_()
 
