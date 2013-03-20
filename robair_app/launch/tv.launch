@@ -5,10 +5,11 @@
   <param name="tv_jabber_id" value="$(arg jid)"/>
   <param name="tv_jabber_password" value="$(arg password)"/>
   <param name="robot_jabber_id" value="$(arg robot_jid)"/>
+  <param name="robair_api_url" value="http://robair.quicker.fr/api/" />
 
+  <node pkg="robair_driver" type="keyboard.py" name="keyboard" required="true" output="screen" />
   <node pkg="robair_driver" type="webcam.py" name="webcam" required="true" output="screen" />
   <node pkg="robair_app" type="http_streamer.py" name="http_streamer" required="true" output="screen" />
   <node pkg="robair_app" type="client_manager.py" name="client_manager" required="true" output="screen"/>
-  <node pkg="robair_driver" type="keyboard.py" name="keyboard" required="true" output="screen" />
 
 </launch>
