@@ -64,8 +64,14 @@ class NxtNode(object):
             self.move()
             time.sleep(0.1)
 
+    def shutdown(self):
+        self.motor_a.idle()
+        self.motor_b.idle()
+
+
 if __name__ == '__main__':
     nxt_node = NxtNode()
     rospy.loginfo("%s running..." % nxt_node.node_name)
     nxt_node.main_loop()
+    nxt_node.shutdown()
     rospy.loginfo("%s stopped." % nxt_node.node_name)
