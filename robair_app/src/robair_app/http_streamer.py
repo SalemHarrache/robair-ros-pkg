@@ -5,6 +5,7 @@ import select
 import uuid
 import multiprocessing
 
+from gevent.pywsgi import WSGIServer
 from flask import Flask, Response
 from .player import VideoStreamPlayer
 
@@ -13,7 +14,7 @@ def get_local_ip_address():
     ipaddr = ''
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("google.fr", 8000))
+        s.connect(("google.fr", 80))
         ipaddr = s.getsockname()[0]
         s.close()
     except:
@@ -30,17 +31,21 @@ class HTTPStreamer(object):
         self.local_address = get_local_ip_address()
         app.debug = debug
         app.add_url_rule('/', 'webcam', self.video_stream_response)
-        run_funct = lambda: app.run(port=port, host=self.host, threaded=True)
+        self.wsgi = WSGIServer((self.host, self.port), app)
+        run_funct = lambda: self.wsgi.serve_forever()
         self.server = multiprocessing.Process(target=run_funct)
 
     def video_stream_response(self):
         def video_stream_tcp():
-            buffer_size = 1000
+            buffer_size = 10000
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect(('', 9999))
             while True:
-                readable = select.select([s], [], [])
-                yield readable[0][0].recv(buffer_size)
+                try:
+                    readable = select.select([s], [], [])
+                    yield readable[0][0].recv(buffer_size)
+                except:
+                    pass
         return Response(video_stream_tcp(), mimetype='video/mp4')
 
     @property
