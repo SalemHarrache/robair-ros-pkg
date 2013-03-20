@@ -1,25 +1,33 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import os
-import roslib
-import rospy
-
-roslib.load_manifest('robair_app')
-
-from robair_app.http_streamer import HTTPStreamer
+import socket
+import select
+import uuid
+from flask import Flask, Response
 
 
-if __name__ == '__main__':
-    node_name = os.path.basename(__file__).strip('.py')
+app = Flask(__name__)
+app.secret_key = uuid.uuid4()
 
-    rospy.init_node(node_name)
-    server = HTTPStreamer()
-    server.start()
-    print server.url
-    server.display(server.url)
 
-    rospy.loginfo("%s running..." % node_name)
-    rospy.spin()
-    rospy.loginfo("%s stopping..." % node_name)
-    server.stop()
-    rospy.loginfo("%s stopped." % node_name)
+@app.route('/', methods=["GET"])
+def video():
+    return Response(video_stream_tcp(), mimetype='video/mp4')
+
+
+def video_stream_tcp():
+    buffer_size = 10000
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('', 9999))
+    while True:
+        readable = select.select([s], [], [])
+        yield readable[0][0].recv(buffer_size)
+
+
+def run():
+    app.debug = False
+    app.run(port=9090, host="0.0.0.0", threaded=True)
+
+if __name__ == "__main__":
+    run()
