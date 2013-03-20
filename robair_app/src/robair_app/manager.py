@@ -22,8 +22,8 @@ class RobotManager(ClientXMPP):
     @remote
     def hello(self, key):
         # TODO: use ressource manager website !
-        jid = self.current_rpc_session().client_jid
-        self.clients.append(jid)
+        # jid = self.current_rpc_session().client_jid
+        # self.clients.append(jid)
         return True
         # url = rospy.get_param('robair_api_url')
         # r = requests.get(url + "check", params={"key": key})
@@ -44,10 +44,10 @@ class RobotManager(ClientXMPP):
 
     @remote
     def publish_cmd(self, cmd):
-        jid = self.current_rpc_session().client_jid
-        if jid in self.clients:
-            self.cmd_publisher.publish(cmd)
-            return True
+        # jid = self.current_rpc_session().client_jid
+        # if jid in self.clients:
+        self.cmd_publisher.publish(cmd)
+        return True
 
 
 class ClientManager(ClientXMPP):
@@ -58,8 +58,8 @@ class ClientManager(ClientXMPP):
         rospy.init_node(node_name)
         self.robot_jid = rospy.get_param('robot_jabber_id')
         self.proxy_robot = self.get_proxy(self.robot_jid)
-        if not self.proxy_robot.hello(self.make_reservation()):
-            raise RuntimeError('RobAir permission denied, try later...')
+        # if not self.proxy_robot.hello(self.make_reservation()):
+        #     raise RuntimeError('RobAir permission denied, try later...')
         # subscriber to a remote cmd
         rospy.Subscriber('/cmd', Command, self.proxy_robot.publish_cmd)
 
