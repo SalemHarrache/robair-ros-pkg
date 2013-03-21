@@ -21,15 +21,19 @@ class RobotManager(ClientXMPP):
 
     @remote
     def hello(self, key):
-        url = rospy.get_param('robair_api_url')
-        r = requests.get(url + "check", params={"key": key})
-        authorize = r.json()['valid']
-        if r.json()['valid']:
-            jid = self.current_rpc_session().client_jid
-            self.clients[jid] = self.get_proxy(jid)
-            run_player(self.get_url_streaming(),
-                       self.clients[jid].get_url_streaming())
-        return authorize
+        # TODO: use ressource manager website !
+        # jid = self.current_rpc_session().client_jid
+        # self.clients.append(jid)
+        return True
+        # url = rospy.get_param('robair_api_url')
+        # r = requests.get(url + "check", params={"key": key})
+        # authorize = r.json()['valid']
+        # if r.json()['valid']:
+        #     jid = self.current_rpc_session().client_jid
+        #     self.clients[jid] = self.get_proxy(jid)
+        #     run_player(self.get_url_streaming(),
+        #                self.clients[jid].get_url_streaming())
+        # return authorize
 
     @remote
     def run_video_player(self, remote_url):
@@ -61,14 +65,14 @@ class ClientManager(ClientXMPP):
         rospy.Subscriber('/cmd', Command, self.proxy_robot.publish_cmd)
 
     def make_reservation(self):
-        TODO: use ressource manager website !
-        url = rospy.get_param('robair_api_url')
-        r = requests.get(url + "new", params={"jid": self.jid})
-        data = r.json()
-        if data['error']:
-            log.info("Error: %s" % data['error_message'])
-        else:
-            return data['key']
+        # TODO: use ressource manager website !
+        # url = rospy.get_param('robair_api_url')
+        # r = requests.get(url + "new", params={"jid": self.jid})
+        # data = r.json()
+        # if data['error']:
+        #     log.info("Error: %s" % data['error_message'])
+        # else:
+        #     return data['key']
         return uuid.uuid4()
 
     def run_video_player(self):
